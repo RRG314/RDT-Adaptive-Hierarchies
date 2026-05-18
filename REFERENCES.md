@@ -32,5 +32,8 @@
 ## Public Data
 
 - scikit-learn California Housing dataset documentation. <https://scikit-learn.org/stable/modules/generated/sklearn.datasets.fetch_california_housing.html>
+- scikit-learn Digits dataset documentation. <https://scikit-learn.org/stable/modules/generated/sklearn.datasets.load_digits.html>
+- scikit-learn Breast Cancer Wisconsin dataset documentation. <https://scikit-learn.org/stable/modules/generated/sklearn.datasets.load_breast_cancer.html>
+- Plotly public datasets, 2014 US cities CSV. <https://github.com/plotly/datasets/blob/master/2014_us_cities.csv>
 - Numenta Anomaly Benchmark repository. <https://github.com/numenta/NAB>
 - Project Gutenberg, Alice's Adventures in Wonderland. <https://www.gutenberg.org/etext/11>

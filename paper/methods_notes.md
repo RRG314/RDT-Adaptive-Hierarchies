@@ -62,7 +62,7 @@ Stable partition baselines currently include:
 - grid partitioning,
 - remapped-label RDT ablation.
 
-Implemented release-hardening and deep-validation baselines:
+Implemented release-hardening, deep-validation, and submission-validation baselines:
 
 - virtual-node consistent hashing,
 - Hilbert ordering,
@@ -72,11 +72,11 @@ Implemented release-hardening and deep-validation baselines:
 - shuffled-label null control with matched counts,
 - random-label null control.
 
-Missing before submission:
+Remaining before submission:
 
 - workload-specific production partitioners,
-- larger real geospatial workloads,
-- memory RSS profiling,
+- larger real geospatial/vector/shard migration workloads,
+- isolated per-method memory profiling,
 - parameter sensitivity for virtual-node counts and geospatial levels.
 
 ## RDT-Cover Method
@@ -93,7 +93,7 @@ RDT-cover generates a deterministic set of numeric test cases from a bounded dom
 
 The benchmark also includes boundary-only, midpoint-only, powers-only, Sobol, Halton, Latin hypercube, random, hybrid RDT+Sobol, and Hypothesis-targeted baselines. The intended use is not to replace random or property-based testing. It is to ensure that known numerical stress regions appear under a finite budget when explicit properties are not yet formalized.
 
-The expanded 14-class corpus narrowed the RDT-cover claim. At budget `1024`, Hypothesis-targeted coverage found `13/14` classes, powers-only found `11/14`, and full RDT-cover found `10/14`. This means the paper should not imply that the full RDT schedule is the best edge-case schedule. The defensible point is that deterministic multiscale anchors beat blind random, Sobol, Halton, and Latin hypercube on this corpus.
+The expanded 14-class corpus narrowed the RDT-cover claim. At budget `2048`, Hypothesis-targeted coverage found `13/14` classes, powers-only found `11/14`, and full RDT-cover found `10/14`. A separate floating-point property benchmark found that RDT-cover caught several numerical traps but missed the tangent-periodicity failure at budget `512`. This means the paper should not imply that the full RDT schedule is the best edge-case schedule. The defensible point is that deterministic multiscale anchors beat blind random, Sobol, Halton, and Latin hypercube on this corpus and provide reproducible property-free coverage when explicit predicates are not yet available.
 
 ## Residual Sampler Method
 

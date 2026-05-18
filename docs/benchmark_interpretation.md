@@ -10,16 +10,16 @@ Can stable ancestor-label inheritance reduce movement while preserving locality 
 
 Current answer:
 
-Yes, on the tested synthetic and California Housing resize tasks. The deep-validation run covered eight datasets, five resize pairs, and three seeds. RDT stable labels were the best combined score in `40/40` dataset/resize tasks.
+Yes, on the tested synthetic, public geospatial, and sklearn feature resize tasks. The submission-validation run covered 12 workloads, five resize pairs, and 10 seeds. RDT stable labels were the best combined score in `60/60` dataset/resize tasks.
 
 The key real-data table is:
 
 | Resize | RDT stable | Jump Hash | Rendezvous Hash | Morton sort | Principal sort |
 |---|---:|---:|---:|---:|---:|
-| 16 -> 20 | 0.4686 | 0.6746 | 0.6759 | 0.9208 | 0.8939 |
-| 32 -> 40 | 0.4695 | 0.7174 | 0.6812 | 0.9682 | 0.9531 |
-| 64 -> 80 | 0.4706 | 0.7219 | 0.7763 | 0.9889 | 0.9846 |
-| 128 -> 160 | 0.4514 | 0.7544 | 0.7546 | 0.9971 | 0.9991 |
+| 16 -> 20 | 0.4673 | 0.6748 | 0.6761 | 0.9210 | 0.8941 |
+| 32 -> 40 | 0.4698 | 0.7177 | 0.6807 | 0.9670 | 0.9531 |
+| 64 -> 80 | 0.4728 | 0.7218 | 0.7757 | 0.9887 | 0.9847 |
+| 128 -> 160 | 0.4464 | 0.7540 | 0.7540 | 0.9973 | 0.9991 |
 
 Why the result matters:
 
@@ -31,7 +31,7 @@ Grid and Morton methods are faster in raw timing checks. The present claim is ab
 
 Deep-validation update:
 
-Hilbert, H3, S2, geohash, and virtual-node consistent hashing are implemented. The deep-validation run also added hotspot-tail, anisotropic Gaussian, ring/annulus, two-cluster imbalance, California Housing, shuffled-label null controls, random-label null controls, score-weight sensitivity columns, build time, assignment time, and `tracemalloc` peak-memory fields. This improves baseline and artifact-control coverage, but it does not replace larger production workloads or resident-set-size profiling.
+Hilbert, H3, S2, geohash, virtual-node consistent hashing, and targeted rendezvous hashing are implemented. The submission-validation run added public US cities, sklearn digits PCA, sklearn digits 64D features, sklearn breast-cancer features, RSS snapshots, and automated stress tests for duplicate points, all-same points, high-dimensional inputs, and adversarial ordering. This improves baseline and artifact-control coverage, but it does not replace production-style shard migration workloads or isolated per-method memory profiling.
 
 What would weaken the claim:
 
@@ -51,10 +51,10 @@ The inheritance rule matters. Remapped labels lose badly:
 
 | Dataset | Resize | Stable labels | Remapped labels | Jump Hash |
 |---|---:|---:|---:|---:|
-| California Housing | 16 -> 20 | 0.4686 | 1.2806 | 0.6746 |
-| California Housing | 64 -> 80 | 0.4706 | 1.2612 | 0.7219 |
-| Synthetic uniform | 16 -> 20 | 0.2005 | 0.9190 | 0.6744 |
-| Synthetic clustered | 16 -> 20 | 0.2511 | 0.9173 | 0.6746 |
+| California Housing | 16 -> 20 | 0.4673 | 1.2684 | 0.6748 |
+| California Housing | 64 -> 80 | 0.4728 | 1.2444 | 0.7218 |
+| Synthetic uniform | 16 -> 20 | 0.2010 | 0.9164 | 0.6744 |
+| Synthetic clustered | 16 -> 20 | 0.2609 | 0.8934 | 0.6746 |
 
 Interpretation:
 
@@ -70,20 +70,20 @@ Current answer:
 
 Yes, compared with blind random, Sobol, Halton, and Latin hypercube. No, compared with targeted Hypothesis or even the simpler powers-only ablation on the expanded corpus.
 
-At budget `1024` on the 14-class corpus:
+At budget `2048` on the 14-class corpus:
 
 | Method | Mean bug classes found | Mean total hits |
 |---|---:|---:|
-| Hypothesis-targeted | 13.00 | 1294.33 |
-| Powers-only | 11.00 | 661.33 |
-| RDT full | 10.00 | 199.67 |
-| Boundary-only | 9.00 | 306.67 |
-| RDT+Sobol | 9.00 | 256.33 |
-| Midpoint-only | 6.00 | 1669.67 |
-| Random uniform | 4.00 | 278.33 |
-| Sobol | 4.00 | 268.67 |
-| Halton | 4.00 | 270.67 |
-| Latin hypercube | 4.00 | 272.33 |
+| Hypothesis-targeted | 13.00 | 2562.00 |
+| Powers-only | 11.00 | 920.50 |
+| RDT full | 10.00 | 274.60 |
+| Boundary-only | 9.00 | 561.30 |
+| RDT+Sobol | 9.00 | 418.10 |
+| Midpoint-only | 6.00 | 3347.70 |
+| Random uniform | 4.00 | 532.70 |
+| Sobol | 4.00 | 539.20 |
+| Halton | 4.00 | 539.00 |
+| Latin hypercube | 4.00 | 539.40 |
 
 Why the result matters:
 
@@ -95,7 +95,7 @@ The Hypothesis-targeted baseline finds the most classes because it uses predicat
 
 What this does not support:
 
-It does not show that RDT-cover beats Hypothesis, fuzzing, adaptive random testing, or simpler hand-designed edge schedules on real bugs. The next step is a real numerical bug or mutant corpus with time-to-first-failure reporting.
+It does not show that RDT-cover beats Hypothesis, fuzzing, adaptive random testing, or simpler hand-designed edge schedules on real bugs. A new property-style benchmark found that RDT-cover catches several floating-point traps but misses the tangent-periodicity case at budget `512`. The next step is a real numerical bug or mutant corpus with time-to-first-failure reporting.
 
 ## Geometry Validation
 

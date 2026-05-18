@@ -12,6 +12,7 @@ from typing import List
 
 from ..applications.cover import benchmark_cover_methods
 from ..applications.stable_partition import benchmark_partition_methods
+from .memory import process_rss_kib
 from .stable_partition_bench import make_spatial_dataset
 
 
@@ -23,21 +24,27 @@ def run(output_dir: Path, stable_sizes: List[int], cover_budgets: List[int]) -> 
     for n in stable_sizes:
         points = make_spatial_dataset("uniform", n=n, seed=0)
         tracemalloc.start()
+        rss_start_kib = process_rss_kib()
         for result in benchmark_partition_methods(points, dataset="uniform", k1=16, k2=20, seed=0).values():
             row = {"suite": "stable_partition_scaling", "n": n, **asdict(result)}
             row["combined_score_lower_is_better"] = (
                 row["movement"] + 0.45 * row["locality_k2"] + 0.20 * max(0.0, row["imbalance_k2"] - 1.0)
             )
             row["python_peak_memory_kib"] = float(tracemalloc.get_traced_memory()[1] / 1024.0)
+            row["process_rss_kib"] = process_rss_kib()
+            row["process_rss_delta_kib"] = max(0.0, row["process_rss_kib"] - rss_start_kib)
             stable_rows.append(row)
         tracemalloc.stop()
 
     bounds = [(-1e6, 1e6), (-1e6, 1e6)]
     for budget in cover_budgets:
         tracemalloc.start()
+        rss_start_kib = process_rss_kib()
         for result in benchmark_cover_methods(bounds, budget=budget, seed=0).values():
             row = {"suite": "cover_scaling", **asdict(result)}
             row["python_peak_memory_kib"] = float(tracemalloc.get_traced_memory()[1] / 1024.0)
+            row["process_rss_kib"] = process_rss_kib()
+            row["process_rss_delta_kib"] = max(0.0, row["process_rss_kib"] - rss_start_kib)
             cover_rows.append(row)
         tracemalloc.stop()
 
@@ -70,7 +77,9 @@ def _stable_summary(rows: list[dict]) -> list[dict]:
             "fastest_seconds": fastest["build_seconds"] + fastest["assign_seconds"],
             "rdt_score": rdt["combined_score_lower_is_better"],
             "best_score": best_score["combined_score_lower_is_better"],
-            "peak_memory_kib": max(row["python_peak_memory_kib"] for row in group),
+            "peak_python_memory_kib": max(row["python_peak_memory_kib"] for row in group),
+            "peak_rss_kib": max(row["process_rss_kib"] for row in group),
+            "peak_rss_delta_kib": max(row["process_rss_delta_kib"] for row in group),
         })
     return out
 
@@ -90,7 +99,9 @@ def _cover_summary(rows: list[dict]) -> list[dict]:
             "fastest_seconds": fastest["runtime_seconds"],
             "rdt_bug_classes": rdt["discovered_bug_classes"],
             "best_bug_classes": best_classes["discovered_bug_classes"],
-            "peak_memory_kib": max(row["python_peak_memory_kib"] for row in group),
+            "peak_python_memory_kib": max(row["python_peak_memory_kib"] for row in group),
+            "peak_rss_kib": max(row["process_rss_kib"] for row in group),
+            "peak_rss_delta_kib": max(row["process_rss_delta_kib"] for row in group),
         })
     return out
 
@@ -107,29 +118,31 @@ def _render_markdown(result: dict) -> str:
     lines = [
         "# Performance Scaling Result Card",
         "",
-        "These are safe local scaling checks, not production profiling. Memory is Python `tracemalloc` peak memory.",
+        "These are safe local scaling checks, not production profiling. Memory includes Python `tracemalloc` peak memory and process resident-set-size snapshots.",
         "",
         "## Stable partition",
         "",
-        "| N | Best score method | Fastest method | RDT seconds | Fastest seconds | RDT score | Best score | Peak memory KiB |",
-        "|---:|---|---|---:|---:|---:|---:|---:|",
+        "| N | Best score method | Fastest method | RDT seconds | Fastest seconds | RDT score | Best score | Peak RSS KiB | RSS delta KiB |",
+        "|---:|---|---|---:|---:|---:|---:|---:|---:|",
     ]
     for row in result["stable_summary"]:
         lines.append(
             f"| {row['n']} | `{row['best_score_method']}` | `{row['fastest_method']}` | {row['rdt_seconds']:.4f} | "
-            f"{row['fastest_seconds']:.4f} | {row['rdt_score']:.4f} | {row['best_score']:.4f} | {row['peak_memory_kib']:.0f} |"
+            f"{row['fastest_seconds']:.4f} | {row['rdt_score']:.4f} | {row['best_score']:.4f} | "
+            f"{row['peak_rss_kib']:.0f} | {row['peak_rss_delta_kib']:.0f} |"
         )
     lines.extend([
         "",
         "## RDT-cover",
         "",
-        "| Budget | Best discovery method | Fastest method | RDT seconds | Fastest seconds | RDT classes | Best classes | Peak memory KiB |",
-        "|---:|---|---|---:|---:|---:|---:|---:|",
+        "| Budget | Best discovery method | Fastest method | RDT seconds | Fastest seconds | RDT classes | Best classes | Peak RSS KiB | RSS delta KiB |",
+        "|---:|---|---|---:|---:|---:|---:|---:|---:|",
     ])
     for row in result["cover_summary"]:
         lines.append(
             f"| {row['budget']} | `{row['best_discovery_method']}` | `{row['fastest_method']}` | {row['rdt_seconds']:.4f} | "
-            f"{row['fastest_seconds']:.4f} | {row['rdt_bug_classes']} | {row['best_bug_classes']} | {row['peak_memory_kib']:.0f} |"
+            f"{row['fastest_seconds']:.4f} | {row['rdt_bug_classes']} | {row['best_bug_classes']} | "
+            f"{row['peak_rss_kib']:.0f} | {row['peak_rss_delta_kib']:.0f} |"
         )
     return "\n".join(lines) + "\n"
 

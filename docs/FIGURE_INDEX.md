@@ -24,7 +24,7 @@ This figure is the most important mechanism evidence. It compares stable labels 
 
 ![RDT-cover edge-case discovery](figures/coverage_ablation.svg)
 
-This figure shows how many seeded numerical edge-case classes were found by each coverage method at budget `1024` on the expanded 14-class corpus. Hypothesis-targeted coverage found the most classes, powers-only beat full RDT-cover, and blind random/Sobol/Halton/Latin hypercube found fewer. The supported claim is therefore narrower: RDT-cover is a deterministic edge-case schedule that beats blind coverage here, not a replacement for property-based testing or simpler tuned edge schedules.
+This figure shows how many seeded numerical edge-case classes were found by each coverage method at budget `2048` on the expanded 14-class corpus over 10 seeds. Hypothesis-targeted coverage found the most classes, powers-only beat full RDT-cover, and blind random/Sobol/Halton/Latin hypercube found fewer. The supported claim is therefore narrower: RDT-cover is a deterministic edge-case schedule that beats blind coverage here, not a replacement for property-based testing or simpler tuned edge schedules.
 
 ## Residual Sampler Failure Case
 

@@ -6,9 +6,9 @@ This project keeps claims only when they have definitions, benchmark evidence, b
 
 Claim: stable ancestor-label inheritance improves the movement/locality/load tradeoff in the tested resize tasks.
 
-Evidence: in the deep-validation benchmark, RDT stable labels had the best combined score in `40` of `40` tested dataset/resize tasks. The run covered uniform, clustered, diagonal, hotspot-tail, anisotropic Gaussian, ring/annulus, two-cluster imbalance, and California Housing coordinate datasets; resize pairs `8->10`, `16->20`, `32->40`, `64->80`, and `128->160`; and hash, virtual-node hash, geospatial, spatial-order, grid, remapped-label, shuffled-label, and random-label baselines.
+Evidence: in the submission-validation benchmark, RDT stable labels had the best combined score in `60` of `60` tested dataset/resize tasks. The run covered uniform, clustered, diagonal, hotspot-tail, anisotropic Gaussian, ring/annulus, two-cluster imbalance, California Housing coordinates, public US cities, sklearn digits PCA, sklearn digits 64D features, and sklearn breast-cancer features; resize pairs `8->10`, `16->20`, `32->40`, `64->80`, and `128->160`; and hash, virtual-node hash, geospatial, spatial-order, grid, remapped-label, shuffled-label, and random-label baselines.
 
-Ablation: stable labels beat remapped labels on every tested partition task. In the deep-validation summary, California Housing `16->20` scored `0.4686` for stable labels, `1.2806` for remapped labels, and `0.6746` for Jump Hash. Across all rows, the mean combined score was `0.2905` for stable labels, `0.8620` for remapped labels, `1.0806` for shuffled labels with matched counts, and `1.0625` for random labels.
+Ablation: stable labels beat remapped labels on every tested partition task. In the submission-validation summary, California Housing `16->20` scored `0.4673` for stable labels, `1.2684` for remapped labels, and `0.6748` for Jump Hash. Across the broad matrix, the mean combined score was `0.3263` for stable labels, `1.0402` for remapped labels, `1.5224` for shuffled labels with matched counts, and `1.4747` for random labels.
 
 Failure condition: the claim weakens if stable labels do not beat remapped labels or if stronger baselines match the movement/locality/load tradeoff.
 
@@ -20,7 +20,7 @@ Forbidden wording: RDT is generally better than consistent hashing, H3, S2, KDTr
 
 Claim: RDT-cover is a deterministic multiscale edge-case generator that improves over blind random, low-discrepancy, and Latin hypercube sampling on the current seeded corpus, but it is not the strongest method in the expanded benchmark.
 
-Evidence: the expanded deep-validation corpus has `14` seeded edge-case classes. At budget `1024`, Hypothesis-targeted coverage found `13` classes, the powers-only ablation found `11`, full RDT-cover found `10`, boundary-only found `9`, RDT+Sobol found `9`, and random, Sobol, Halton, and Latin hypercube each found `4`.
+Evidence: the expanded submission-validation corpus has `14` seeded edge-case classes. At budget `2048`, Hypothesis-targeted coverage found `13` classes, the powers-only ablation found `11`, full RDT-cover found `10`, boundary-only found `9`, RDT+Sobol found `9`, and random, Sobol, Halton, and Latin hypercube each found `4`. A separate property benchmark found that RDT-cover detected failures for division roundtrip, log/exp roundtrip, square-root overflow, and near-singular matrix checks, but not the tangent-periodicity failure at budget `512`.
 
 Ablation: the powers-only ablation outperformed full RDT-cover on class count in this expanded corpus. This weakens the older claim that the full schedule is the clearly best deterministic construction. The useful mechanism is better described as deterministic inclusion of scale and boundary anchors, with RDT ordering providing a reproducible way to combine those anchors with shell/midpoint coverage.
 

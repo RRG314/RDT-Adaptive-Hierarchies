@@ -40,14 +40,14 @@ That is the mechanism tested by the stable-label ablation.
 
 The current evidence is strongest for stable partitioning.
 
-On California Housing coordinates in the deep-validation run:
+On California Housing coordinates in the 10-seed submission-validation run:
 
-| Resize | RDT stable | Jump Hash | Morton sort |
-|---|---:|---:|---:|
-| 16 -> 20 | 0.4686 | 0.6746 | 0.9208 |
-| 32 -> 40 | 0.4695 | 0.7174 | 0.9682 |
-| 64 -> 80 | 0.4706 | 0.7219 | 0.9889 |
-| 128 -> 160 | 0.4514 | 0.7544 | 0.9971 |
+| Resize | RDT stable | Jump Hash | Rendezvous Hash | Morton sort |
+|---|---:|---:|---:|---:|
+| 16 -> 20 | 0.4673 | 0.6748 | 0.6761 | 0.9210 |
+| 32 -> 40 | 0.4698 | 0.7177 | 0.6807 | 0.9670 |
+| 64 -> 80 | 0.4728 | 0.7218 | 0.7757 | 0.9887 |
+| 128 -> 160 | 0.4464 | 0.7540 | 0.7540 | 0.9973 |
 
 The current evidence for RDT-cover is useful but narrower than the earlier 5-class corpus suggested:
 
@@ -62,7 +62,7 @@ The current evidence for RDT-cover is useful but narrower than the earlier 5-cla
 | Halton | 4.00 |
 | Latin hypercube | 4.00 |
 
-These are real benchmark numbers, not goals. They are also bounded numbers: stable partitioning is the strongest result; RDT-cover beats blind sampling but does not beat targeted Hypothesis or the simpler powers-only ablation on the expanded synthetic corpus.
+These are real benchmark numbers, not goals. They are also bounded numbers: stable partitioning is the strongest result; RDT-cover beats blind sampling but does not beat targeted Hypothesis or the simpler powers-only ablation on the expanded synthetic corpus. The separate property benchmark adds useful evidence but also a failure case: RDT-cover missed the tangent-periodicity failure at budget `512`.
 
 ## Why Some Ideas Are Not Promoted
 

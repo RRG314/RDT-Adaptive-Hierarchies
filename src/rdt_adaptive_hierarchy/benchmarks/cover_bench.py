@@ -13,6 +13,7 @@ from typing import Dict, List
 import numpy as np
 
 from ..applications.cover import benchmark_cover_methods, seeded_numeric_bug_predicates
+from .memory import process_rss_kib
 
 
 def run(output_dir: Path, seeds: int = 3, budget: int = 512, budgets: List[int] | None = None) -> Dict[str, object]:
@@ -22,11 +23,18 @@ def run(output_dir: Path, seeds: int = 3, budget: int = 512, budgets: List[int] 
     if budgets is None:
         budgets = [budget]
     tracemalloc.start()
+    rss_start_kib = process_rss_kib()
     for budget_value in budgets:
         for seed in range(seeds):
             for result in benchmark_cover_methods(bounds, budget=budget_value, seed=seed).values():
-                rows.append({"seed": seed, **asdict(result), "python_peak_memory_kib": float(tracemalloc.get_traced_memory()[1] / 1024.0)})
+                rows.append({
+                    "seed": seed,
+                    **asdict(result),
+                    "python_peak_memory_kib": float(tracemalloc.get_traced_memory()[1] / 1024.0),
+                    "process_rss_kib": process_rss_kib(),
+                })
     peak_kib = float(tracemalloc.get_traced_memory()[1] / 1024.0)
+    rss_end_kib = process_rss_kib()
     tracemalloc.stop()
     summary = _summarize(rows)
     result = {
@@ -35,6 +43,9 @@ def run(output_dir: Path, seeds: int = 3, budget: int = 512, budgets: List[int] 
         "rows": rows,
         "summary": summary,
         "peak_memory_kib": peak_kib,
+        "rss_start_kib": rss_start_kib,
+        "rss_end_kib": rss_end_kib,
+        "rss_delta_kib": rss_end_kib - rss_start_kib,
     }
     (output_dir / "cover_results.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
     _write_csv(output_dir / "cover_summary.csv", rows)
@@ -67,6 +78,7 @@ def _summarize(rows: List[dict]) -> List[dict]:
                 "discrepancy_mean": float(np.mean(discrepancies)),
                 "discrepancy_ci95": _ci95(discrepancies),
                 "python_peak_memory_kib_max": float(max(row.get("python_peak_memory_kib", 0.0) for row in group)),
+                "process_rss_kib_max": float(max(row.get("process_rss_kib", 0.0) for row in group)),
             })
     return out
 
@@ -91,7 +103,7 @@ def _render_markdown(summary: List[dict]) -> str:
         "",
         "Higher bug-class discovery is better. Centered discrepancy is reported as a space-filling diagnostic, not the primary RDT-cover objective.",
         "",
-        "| Method | Mean bug classes ±95% CI | Mean total hits ±95% CI | Mean discrepancy ±95% CI | Peak Python memory KiB |",
+        "| Method | Mean bug classes ±95% CI | Mean total hits ±95% CI | Mean discrepancy ±95% CI | Peak RSS KiB |",
         "|---|---:|---:|---:|---:|",
     ]
     max_budget = max(row["budget"] for row in summary) if summary else 0
@@ -100,7 +112,7 @@ def _render_markdown(summary: List[dict]) -> str:
             f"| `{row['method']}` | {row['bug_classes_mean']:.2f} ± {row['bug_classes_ci95']:.2f} | "
             f"{row['total_hits_mean']:.2f} ± {row['total_hits_ci95']:.2f} | "
             f"{row['discrepancy_mean']:.5f} ± {row['discrepancy_ci95']:.5f} | "
-            f"{row['python_peak_memory_kib_max']:.0f} |"
+            f"{row['process_rss_kib_max']:.0f} |"
         )
     return "\n".join(lines) + "\n"
 

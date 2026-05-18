@@ -1,65 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="980" height="560" viewBox="0 0 980 560">
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="600" viewBox="0 0 1120 600">
 <rect width="100%" height="100%" fill="#fbfbf8"/>
-<text x="105" y="40" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700" fill="#222">RDT-cover edge-case discovery</text>
-<text x="105" y="68" font-family="Inter, Arial, sans-serif" font-size="14" fill="#555">Mean seeded edge-case classes found at budget 1024 over 3 seeds.</text>
-<text x="105" y="89" font-family="Inter, Arial, sans-serif" font-size="13" fill="#666">Expanded 14-class corpus. Hypothesis and powers-only are stronger than full RDT-cover here.</text>
-
-<line x1="105" y1="430" x2="930" y2="430" stroke="#333"/>
-<line x1="105" y1="338.6" x2="930" y2="338.6" stroke="#d9d7cf"/>
-<line x1="105" y1="247.1" x2="930" y2="247.1" stroke="#d9d7cf"/>
-<line x1="105" y1="155.7" x2="930" y2="155.7" stroke="#d9d7cf"/>
-<line x1="105" y1="110" x2="930" y2="110" stroke="#d9d7cf"/>
-<line x1="105" y1="110" x2="105" y2="430" stroke="#333"/>
-<line x1="105" y1="430" x2="930" y2="430" stroke="#333"/>
-
-<text x="93" y="434" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">0</text>
-<text x="93" y="342.6" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">4</text>
-<text x="93" y="251.1" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">8</text>
-<text x="93" y="159.7" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">12</text>
-<text x="93" y="114" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">14</text>
-<text x="32" y="270" transform="rotate(-90, 32, 270)" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">edge-case classes found</text>
-
-<rect x="105" y="132.9" width="75" height="297.1" fill="#7B61A8" rx="3"/>
-<text x="142.5" y="124.9" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#222">13.00</text>
-<text x="142.5" y="455" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#333">Hypothesis</text>
-<text x="142.5" y="470" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#333">targeted</text>
-
-<rect x="196" y="178.6" width="75" height="251.4" fill="#B279A2" rx="3"/>
-<text x="233.5" y="170.6" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#222">11.00</text>
-<text x="233.5" y="455" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#333">Powers</text>
-<text x="233.5" y="470" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#333">only</text>
-
-<rect x="287" y="201.4" width="75" height="228.6" fill="#4C78A8" rx="3"/>
-<text x="324.5" y="193.4" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#222">10.00</text>
-<text x="324.5" y="455" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#333">RDT</text>
-<text x="324.5" y="470" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#333">full</text>
-
-<rect x="378" y="224.3" width="75" height="205.7" fill="#72B7B2" rx="3"/>
-<text x="415.5" y="216.3" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#222">9.00</text>
-<text x="415.5" y="455" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#333">Boundary</text>
-<text x="415.5" y="470" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#333">only</text>
-
-<rect x="469" y="224.3" width="75" height="205.7" fill="#59A14F" rx="3"/>
-<text x="506.5" y="216.3" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#222">9.00</text>
-<text x="506.5" y="455" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#333">RDT+</text>
-<text x="506.5" y="470" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#333">Sobol</text>
-
-<rect x="560" y="338.6" width="75" height="91.4" fill="#F58518" rx="3"/>
-<text x="597.5" y="330.6" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#222">4.00</text>
-<text x="597.5" y="455" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#333">Random</text>
-
-<rect x="651" y="338.6" width="75" height="91.4" fill="#54A24B" rx="3"/>
-<text x="688.5" y="330.6" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#222">4.00</text>
-<text x="688.5" y="455" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#333">Sobol</text>
-
-<rect x="742" y="338.6" width="75" height="91.4" fill="#ECA82C" rx="3"/>
-<text x="779.5" y="330.6" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#222">4.00</text>
-<text x="779.5" y="455" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#333">Halton</text>
-
-<rect x="833" y="338.6" width="75" height="91.4" fill="#E45756" rx="3"/>
-<text x="870.5" y="330.6" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#222">4.00</text>
-<text x="870.5" y="455" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#333">Latin</text>
-<text x="870.5" y="470" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#333">hypercube</text>
-
-<text x="105" y="515" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">Source: results/raw/deep_validation_2026-05-18/cover/cover_summary.csv</text>
+<text x="92" y="38" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700" fill="#222">RDT-cover edge-case discovery</text>
+<text x="92" y="66" font-family="Inter, Arial, sans-serif" font-size="14" fill="#555">Mean seeded edge-case classes found at budget 2048 over 10 seeds.</text>
+<line x1="92" y1="480.0" x2="1080" y2="480.0" stroke="#e2e0d8" stroke-width="1"/>
+<text x="82" y="484.0" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">0.00</text>
+<line x1="92" y1="402.4" x2="1080" y2="402.4" stroke="#e2e0d8" stroke-width="1"/>
+<text x="82" y="406.4" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">2.91</text>
+<line x1="92" y1="324.8" x2="1080" y2="324.8" stroke="#e2e0d8" stroke-width="1"/>
+<text x="82" y="328.8" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">5.82</text>
+<line x1="92" y1="247.2" x2="1080" y2="247.2" stroke="#e2e0d8" stroke-width="1"/>
+<text x="82" y="251.2" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">8.74</text>
+<line x1="92" y1="169.6" x2="1080" y2="169.6" stroke="#e2e0d8" stroke-width="1"/>
+<text x="82" y="173.6" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">11.65</text>
+<line x1="92" y1="92.0" x2="1080" y2="92.0" stroke="#e2e0d8" stroke-width="1"/>
+<text x="82" y="96.0" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">14.56</text>
+<line x1="92" y1="92" x2="92" y2="480" stroke="#333"/>
+<line x1="92" y1="480" x2="1080" y2="480" stroke="#333"/>
+<text x="26" y="286.0" transform="rotate(-90, 26, 286.0)" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">bug classes</text>
+<text x="141.4" y="508" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">Hypothesis</text>
+<rect x="102.0" y="133.6" width="75.8" height="346.4" fill="#3B6EA8" rx="2"/>
+<text x="240.2" y="508" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">Powers</text>
+<rect x="200.8" y="186.9" width="75.8" height="293.1" fill="#3B6EA8" rx="2"/>
+<text x="339.0" y="508" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">RDT</text>
+<rect x="299.6" y="213.5" width="75.8" height="266.5" fill="#3B6EA8" rx="2"/>
+<text x="437.8" y="508" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">Boundary</text>
+<rect x="398.4" y="240.2" width="75.8" height="239.8" fill="#3B6EA8" rx="2"/>
+<text x="536.6" y="508" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">RDT+Sobol</text>
+<rect x="497.2" y="240.2" width="75.8" height="239.8" fill="#3B6EA8" rx="2"/>
+<text x="635.4" y="508" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">Midpoint</text>
+<rect x="596.0" y="320.1" width="75.8" height="159.9" fill="#3B6EA8" rx="2"/>
+<text x="734.2" y="508" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">Random</text>
+<rect x="694.8" y="373.4" width="75.8" height="106.6" fill="#3B6EA8" rx="2"/>
+<text x="833.0" y="508" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">Sobol</text>
+<rect x="793.6" y="373.4" width="75.8" height="106.6" fill="#3B6EA8" rx="2"/>
+<text x="931.8" y="508" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">Halton</text>
+<rect x="892.4" y="373.4" width="75.8" height="106.6" fill="#3B6EA8" rx="2"/>
+<text x="1030.6" y="508" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">Latin</text>
+<rect x="991.2" y="373.4" width="75.8" height="106.6" fill="#3B6EA8" rx="2"/>
+<rect x="92" y="542" width="14" height="14" fill="#3B6EA8" rx="2"/>
+<text x="112" y="554" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">classes found</text>
+<text x="1080" y="582" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#777">Expanded 14-class synthetic corpus</text>
 </svg>

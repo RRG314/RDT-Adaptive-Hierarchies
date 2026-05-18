@@ -309,7 +309,15 @@ class RDTStablePartition:
         return locality_dispersion(np.asarray(points, dtype=float), self.assign(points, buckets))
 
 
-def benchmark_partition_methods(points: np.ndarray, dataset: str, k1: int = 16, k2: int = 20, seed: int = 0) -> Dict[str, PartitionBenchmarkResult]:
+def benchmark_partition_methods(
+    points: np.ndarray,
+    dataset: str,
+    k1: int = 16,
+    k2: int = 20,
+    seed: int = 0,
+    include_optional_geospatial: bool = True,
+    include_rendezvous: bool = True,
+) -> Dict[str, PartitionBenchmarkResult]:
     x = np.asarray(points, dtype=float)
     rng = np.random.default_rng(seed)
     keys = np.array([stable_key_from_index(i) for i in range(x.shape[0])], dtype=object)
@@ -356,11 +364,13 @@ def benchmark_partition_methods(points: np.ndarray, dataset: str, k1: int = 16, 
         load_imbalance(labels2), locality_dispersion(x, labels2), 0.0, assign,
     )
 
-    for name, func in {
+    hash_methods = {
         "modulo_hash": modulo_hash,
         "jump_hash": jump_consistent_hash,
-        "rendezvous_hash": rendezvous_hash,
-    }.items():
+    }
+    if include_rendezvous:
+        hash_methods["rendezvous_hash"] = rendezvous_hash
+    for name, func in hash_methods.items():
         start = perf_counter()
         labels1 = np.array([func(k, k1) for k in keys], dtype=np.int64)
         labels2 = np.array([func(k, k2) for k in keys], dtype=np.int64)
@@ -402,22 +412,23 @@ def benchmark_partition_methods(points: np.ndarray, dataset: str, k1: int = 16, 
             load_imbalance(labels2), locality_dispersion(x, labels2), 0.0, assign,
         )
 
-    for name, func in {
-        "h3_sort": h3_sort_partition,
-        "s2_sort": s2_sort_partition,
-        "geohash_sort": geohash_sort_partition,
-    }.items():
-        try:
-            start = perf_counter()
-            labels1 = func(x, k1)
-            labels2 = func(x, k2)
-            assign = perf_counter() - start
-        except ImportError:
-            continue
-        results[name] = PartitionBenchmarkResult(
-            name, dataset, len(x), k1, k2, movement_fraction(labels1, labels2),
-            load_imbalance(labels2), locality_dispersion(x, labels2), 0.0, assign,
-        )
+    if include_optional_geospatial:
+        for name, func in {
+            "h3_sort": h3_sort_partition,
+            "s2_sort": s2_sort_partition,
+            "geohash_sort": geohash_sort_partition,
+        }.items():
+            try:
+                start = perf_counter()
+                labels1 = func(x, k1)
+                labels2 = func(x, k2)
+                assign = perf_counter() - start
+            except ImportError:
+                continue
+            results[name] = PartitionBenchmarkResult(
+                name, dataset, len(x), k1, k2, movement_fraction(labels1, labels2),
+                load_imbalance(labels2), locality_dispersion(x, labels2), 0.0, assign,
+            )
     return results
 
 

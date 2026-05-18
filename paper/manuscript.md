@@ -156,7 +156,7 @@ The current stable partition benchmark compares RDT stable labels with:
 - grid partitioning,
 - remapped-label RDT.
 
-The current baseline set includes Hilbert, H3, S2, geohash, virtual-node hashing, remapped-label ablation, shuffled-label null controls, and random-label null controls. Memory RSS profiling, larger real workloads, production workloads, and parameter sensitivity remain required before stronger claims.
+The current baseline set includes Hilbert, H3, S2, geohash, virtual-node hashing, targeted rendezvous hashing, remapped-label ablation, shuffled-label null controls, and random-label null controls. The submission-validation run adds RSS snapshots, public US cities, sklearn feature workloads, and automated stress tests. Larger production workloads, isolated per-method memory profiling, and parameter sensitivity remain required before stronger claims.
 
 ### 5.4 RDT-Cover
 
@@ -297,10 +297,10 @@ Stable labels outperform remapped labels on representative real and synthetic ta
 
 | Dataset | Resize | Stable labels | Remapped labels | Jump Hash |
 |---|---:|---:|---:|---:|
-| California Housing | 16 -> 20 | 0.4686 | 1.2806 | 0.6746 |
-| California Housing | 64 -> 80 | 0.4706 | 1.2612 | 0.7219 |
-| Synthetic uniform | 16 -> 20 | 0.2005 | 0.9190 | 0.6744 |
-| Synthetic clustered | 16 -> 20 | 0.2511 | 0.9173 | 0.6746 |
+| California Housing | 16 -> 20 | 0.4673 | 1.2684 | 0.6748 |
+| California Housing | 64 -> 80 | 0.4728 | 1.2444 | 0.7218 |
+| Synthetic uniform | 16 -> 20 | 0.2010 | 0.9164 | 0.6744 |
+| Synthetic clustered | 16 -> 20 | 0.2609 | 0.8934 | 0.6746 |
 
 ![Stable label ablation](../docs/figures/stable_partition_ablation.svg)
 
@@ -308,19 +308,19 @@ This is the strongest mechanism evidence. It supports stable ancestor-label inhe
 
 ### 7.3 RDT-Cover Edge-Case Discovery
 
-At budget `1024` on the expanded 14-class corpus:
+At budget `2048` on the expanded 14-class corpus:
 
 | Method | Mean bug classes found | Mean total hits | Mean centered discrepancy |
 |---|---:|---:|---:|
-| Hypothesis-targeted | 13.00 | 1294.33 | 0.02402 |
-| Powers-only | 11.00 | 661.33 | 0.00472 |
-| RDT full | 10.00 | 199.67 | 0.11849 |
-| Boundary-only | 9.00 | 306.67 | 0.00024 |
-| RDT+Sobol | 9.00 | 256.33 | 0.02905 |
-| Random uniform | 4.00 | 278.33 | 0.00024 |
-| Sobol | 4.00 | 268.67 | 0.00000 |
-| Halton | 4.00 | 270.67 | 0.00000 |
-| Latin hypercube | 4.00 | 272.33 | 0.00002 |
+| Hypothesis-targeted | 13.00 | 2562.00 | 0.02410 |
+| Powers-only | 11.00 | 920.50 | 0.00138 |
+| RDT full | 10.00 | 274.60 | 0.11994 |
+| Boundary-only | 9.00 | 561.30 | 0.00015 |
+| RDT+Sobol | 9.00 | 418.10 | 0.03016 |
+| Random uniform | 4.00 | 532.70 | 0.00015 |
+| Sobol | 4.00 | 539.20 | 0.00000 |
+| Halton | 4.00 | 539.00 | 0.00000 |
+| Latin hypercube | 4.00 | 539.40 | 0.00001 |
 
 ![RDT-cover edge-case discovery](../docs/figures/coverage_ablation.svg)
 
@@ -390,17 +390,17 @@ The practical lesson is that future RDT work should use this sequence:
 
 ## 9. Limitations
 
-The stable partition benchmark now includes Hilbert curves, H3, S2, geohash, and virtual-node consistent hashing. It still needs memory RSS profiling, parameter sensitivity, larger real workloads, and production workloads.
+The stable partition benchmark now includes Hilbert curves, H3, S2, geohash, virtual-node consistent hashing, targeted rendezvous hashing, RSS snapshots, and automated stress tests. It still needs isolated per-method memory profiling, parameter sensitivity, larger real workloads, and production workloads.
 
 The combined score uses fixed development weights. Future work should report sensitivity over movement, locality, and load weights.
 
-RDT-cover is tested on a seeded synthetic corpus. This is good mechanism evidence but not real software-failure evidence. Hypothesis-targeted coverage is now included and outperforms RDT-cover when predicates are known. The powers-only ablation also outperforms full RDT-cover on class count. Fuzzers, adaptive random testing, and numerical mutant corpora are still needed.
+RDT-cover is tested on a seeded synthetic corpus and a separate floating-point property benchmark. This is good mechanism evidence but not real software-failure evidence. Hypothesis-targeted coverage is now included and outperforms RDT-cover when predicates are known. The powers-only ablation also outperforms full RDT-cover on class count, and RDT-cover misses the tangent-periodicity property failure at budget `512`. Fuzzers, adaptive random testing, and numerical mutant corpora are still needed.
 
 The geometry validation benchmark uses selected known forms and simple integral checks. Equal-budget quadrature, broader cubature, higher-dimensional tasks, and convergence curves are required before stronger numerical-method claims.
 
 Residual sampling is not evaluated in full solver or training loops. Point-selection metrics cannot support PDE/PINN training claims.
 
-The current implementation is a research implementation. Performance optimization, memory profiling, and API hardening remain needed before a stable library release.
+The current implementation is a research implementation. Performance optimization, isolated memory profiling, and API hardening remain needed before a stable library release.
 
 ## 10. Conclusion
 

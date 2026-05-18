@@ -1,48 +1,65 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="980" height="560" viewBox="0 0 980 560">
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="600" viewBox="0 0 1040 600">
 <rect width="100%" height="100%" fill="#fbfbf8"/>
-<text x="100" y="38" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700" fill="#222">California Housing resize score</text>
-<text x="100" y="66" font-family="Inter, Arial, sans-serif" font-size="14" fill="#555">Lower is better. RDT stable labels preserve locality while moving fewer points than ordering baselines.</text>
-<line x1="100" y1="455.0" x2="940" y2="455.0" stroke="#e2e0d8" stroke-width="1"/>
-<text x="90" y="459.0" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">0.00</text>
-<line x1="100" y1="384.0" x2="940" y2="384.0" stroke="#e2e0d8" stroke-width="1"/>
-<text x="90" y="388.0" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">0.22</text>
-<line x1="100" y1="313.0" x2="940" y2="313.0" stroke="#e2e0d8" stroke-width="1"/>
-<text x="90" y="317.0" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">0.44</text>
-<line x1="100" y1="242.0" x2="940" y2="242.0" stroke="#e2e0d8" stroke-width="1"/>
-<text x="90" y="246.0" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">0.66</text>
-<line x1="100" y1="171.0" x2="940" y2="171.0" stroke="#e2e0d8" stroke-width="1"/>
-<text x="90" y="175.0" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">0.88</text>
-<line x1="100" y1="100.0" x2="940" y2="100.0" stroke="#e2e0d8" stroke-width="1"/>
-<text x="90" y="104.0" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">1.10</text>
-<line x1="100" y1="100" x2="100" y2="455" stroke="#333"/>
-<line x1="100" y1="455" x2="940" y2="455" stroke="#333"/>
-<text x="26" y="277.5" transform="rotate(-90, 26, 277.5)" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">combined score</text>
-<text x="234.0" y="483" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">16-&gt;20</text>
-<rect x="100.0" y="313.6" width="85.3" height="141.4" fill="#4C78A8" rx="2"/>
-<text x="142.7" y="308.6" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="11" fill="#222">0.44</text>
-<rect x="191.3" y="242.7" width="85.3" height="212.3" fill="#F58518" rx="2"/>
-<text x="234.0" y="237.7" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="11" fill="#222">0.66</text>
-<rect x="282.7" y="158.5" width="85.3" height="296.5" fill="#54A24B" rx="2"/>
-<text x="325.3" y="153.5" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="11" fill="#222">0.92</text>
-<text x="520.0" y="483" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">32-&gt;40</text>
-<rect x="386.0" y="295.6" width="85.3" height="159.4" fill="#4C78A8" rx="2"/>
-<text x="428.7" y="290.6" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="11" fill="#222">0.49</text>
-<rect x="477.3" y="240.1" width="85.3" height="214.9" fill="#F58518" rx="2"/>
-<text x="520.0" y="235.1" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="11" fill="#222">0.67</text>
-<rect x="568.7" y="143.1" width="85.3" height="311.9" fill="#54A24B" rx="2"/>
-<text x="611.3" y="138.1" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="11" fill="#222">0.97</text>
-<text x="806.0" y="483" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">64-&gt;80</text>
-<rect x="672.0" y="305.4" width="85.3" height="149.6" fill="#4C78A8" rx="2"/>
-<text x="714.7" y="300.4" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="11" fill="#222">0.46</text>
-<rect x="763.3" y="236.1" width="85.3" height="218.9" fill="#F58518" rx="2"/>
-<text x="806.0" y="231.1" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="11" fill="#222">0.68</text>
-<rect x="854.7" y="138.0" width="85.3" height="317.0" fill="#54A24B" rx="2"/>
-<text x="897.3" y="133.0" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="11" fill="#222">0.98</text>
-<rect x="100" y="510" width="14" height="14" fill="#4C78A8" rx="2"/>
-<text x="120" y="522" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">RDT stable</text>
-<rect x="270" y="510" width="14" height="14" fill="#F58518" rx="2"/>
-<text x="290" y="522" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">Jump Hash</text>
-<rect x="440" y="510" width="14" height="14" fill="#54A24B" rx="2"/>
-<text x="460" y="522" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">Morton</text>
-<text x="940" y="542" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#777">California Housing coordinates, n=20,640</text>
+<text x="92" y="38" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700" fill="#222">California Housing resize score</text>
+<text x="92" y="66" font-family="Inter, Arial, sans-serif" font-size="14" fill="#555">Lower is better. 10-seed targeted geospatial baseline slice.</text>
+<line x1="92" y1="480.0" x2="1000" y2="480.0" stroke="#e2e0d8" stroke-width="1"/>
+<text x="82" y="484.0" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">0.00</text>
+<line x1="92" y1="402.4" x2="1000" y2="402.4" stroke="#e2e0d8" stroke-width="1"/>
+<text x="82" y="406.4" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">0.22</text>
+<line x1="92" y1="324.8" x2="1000" y2="324.8" stroke="#e2e0d8" stroke-width="1"/>
+<text x="82" y="328.8" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">0.45</text>
+<line x1="92" y1="247.2" x2="1000" y2="247.2" stroke="#e2e0d8" stroke-width="1"/>
+<text x="82" y="251.2" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">0.67</text>
+<line x1="92" y1="169.6" x2="1000" y2="169.6" stroke="#e2e0d8" stroke-width="1"/>
+<text x="82" y="173.6" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">0.89</text>
+<line x1="92" y1="92.0" x2="1000" y2="92.0" stroke="#e2e0d8" stroke-width="1"/>
+<text x="82" y="96.0" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">1.12</text>
+<line x1="92" y1="92" x2="92" y2="480" stroke="#333"/>
+<line x1="92" y1="480" x2="1000" y2="480" stroke="#333"/>
+<text x="26" y="286.0" transform="rotate(-90, 26, 286.0)" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">combined score</text>
+<text x="205.5" y="508" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">16->20</text>
+<rect x="102.0" y="317.7" width="48.8" height="162.3" fill="#3B6EA8" rx="2"/>
+<text x="126.4" y="312.7" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" fill="#222">0.47</text>
+<rect x="153.8" y="245.6" width="48.8" height="234.4" fill="#D97B24" rx="2"/>
+<text x="178.1" y="240.6" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" fill="#222">0.67</text>
+<rect x="205.5" y="245.1" width="48.8" height="234.9" fill="#4C9A51" rx="2"/>
+<text x="229.9" y="240.1" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" fill="#222">0.68</text>
+<rect x="257.2" y="160.1" width="48.8" height="319.9" fill="#8E5EA2" rx="2"/>
+<text x="281.6" y="155.1" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" fill="#222">0.92</text>
+<text x="432.5" y="508" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">32->40</text>
+<rect x="329.0" y="316.8" width="48.8" height="163.2" fill="#3B6EA8" rx="2"/>
+<text x="353.4" y="311.8" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" fill="#222">0.47</text>
+<rect x="380.8" y="230.7" width="48.8" height="249.3" fill="#D97B24" rx="2"/>
+<text x="405.1" y="225.7" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" fill="#222">0.72</text>
+<rect x="432.5" y="243.5" width="48.8" height="236.5" fill="#4C9A51" rx="2"/>
+<text x="456.9" y="238.5" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" fill="#222">0.68</text>
+<rect x="484.2" y="144.1" width="48.8" height="335.9" fill="#8E5EA2" rx="2"/>
+<text x="508.6" y="139.1" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" fill="#222">0.97</text>
+<text x="659.5" y="508" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">64->80</text>
+<rect x="556.0" y="315.8" width="48.8" height="164.2" fill="#3B6EA8" rx="2"/>
+<text x="580.4" y="310.8" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" fill="#222">0.47</text>
+<rect x="607.8" y="229.3" width="48.8" height="250.7" fill="#D97B24" rx="2"/>
+<text x="632.1" y="224.3" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" fill="#222">0.72</text>
+<rect x="659.5" y="210.5" width="48.8" height="269.5" fill="#4C9A51" rx="2"/>
+<text x="683.9" y="205.5" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" fill="#222">0.78</text>
+<rect x="711.2" y="136.6" width="48.8" height="343.4" fill="#8E5EA2" rx="2"/>
+<text x="735.6" y="131.6" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" fill="#222">0.99</text>
+<text x="886.5" y="508" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">128->160</text>
+<rect x="783.0" y="324.9" width="48.8" height="155.1" fill="#3B6EA8" rx="2"/>
+<text x="807.4" y="319.9" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" fill="#222">0.45</text>
+<rect x="834.8" y="218.1" width="48.8" height="261.9" fill="#D97B24" rx="2"/>
+<text x="859.1" y="213.1" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" fill="#222">0.75</text>
+<rect x="886.5" y="218.1" width="48.8" height="261.9" fill="#4C9A51" rx="2"/>
+<text x="910.9" y="213.1" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" fill="#222">0.75</text>
+<rect x="938.2" y="133.6" width="48.8" height="346.4" fill="#8E5EA2" rx="2"/>
+<text x="962.6" y="128.6" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" fill="#222">1.00</text>
+<rect x="92" y="542" width="14" height="14" fill="#3B6EA8" rx="2"/>
+<text x="112" y="554" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">RDT stable</text>
+<rect x="216" y="542" width="14" height="14" fill="#D97B24" rx="2"/>
+<text x="236" y="554" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">Jump Hash</text>
+<rect x="336" y="542" width="14" height="14" fill="#4C9A51" rx="2"/>
+<text x="356" y="554" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">Rendezvous</text>
+<rect x="460" y="542" width="14" height="14" fill="#8E5EA2" rx="2"/>
+<text x="480" y="554" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">Morton</text>
+<text x="1000" y="582" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#777">California Housing coordinates, n=3000 per seed</text>
 </svg>

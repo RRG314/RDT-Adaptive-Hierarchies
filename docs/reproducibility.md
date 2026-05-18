@@ -16,9 +16,9 @@ For release checks with optional baselines and package build tooling:
 python -m pip install -e ".[dev]"
 ```
 
-The last benchmark run used:
+The latest local submission-validation run used:
 
-- Python `3.14.3`
+- Python `3.12.12`
 - NumPy `2.4.5`
 - SciPy `1.17.1`
 - scikit-learn `1.8.0`
@@ -58,6 +58,24 @@ PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.geometry_bench --outp
 
 The stable partition smoke run includes Hilbert and virtual-node consistent hashing by default. If optional packages are installed, it also includes H3, S2, and geohash. The cover benchmark includes Hypothesis-targeted coverage when `hypothesis` is installed.
 
+## Submission-Validation Snapshot
+
+The latest submission-validation artifacts were generated on 2026-05-18 with these commands:
+
+```bash
+PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.stable_partition_bench --seeds 10 --n 3000 --datasets uniform,clustered,diagonal,hotspot_tail,anisotropic_gaussian,ring_annulus,two_clusters_imbalance,california_housing,us_cities,digits_pca2,digits_64d,breast_cancer_features --resize-pairs 8:10,16:20,32:40,64:80,128:160 --geospatial-baselines geospatial --rendezvous-baseline off --output-dir results/raw/submission_validation_2026-05-18/stable_partition
+
+PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.stable_partition_bench --seeds 10 --n 3000 --datasets california_housing,us_cities --resize-pairs 8:10,16:20,32:40,64:80,128:160 --geospatial-baselines geospatial --rendezvous-baseline on --output-dir results/raw/submission_validation_2026-05-18/stable_partition_full_geospatial_baselines
+
+PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.cover_bench --seeds 10 --budgets 128,256,512,1024,2048 --output-dir results/raw/submission_validation_2026-05-18/cover
+
+PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.cover_property_bench --seeds 10 --budget 512 --output-dir results/raw/submission_validation_2026-05-18/cover_property
+
+PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.performance_scaling --stable-sizes 1000,5000,20000,50000 --cover-budgets 128,512,1024,2048 --output-dir results/raw/submission_validation_2026-05-18/performance_scaling
+```
+
+These runs report 95% confidence intervals where repeated seeds are used. Memory reports include Python `tracemalloc` peak memory and process resident-set-size snapshots through `psutil` when available. They are not isolated per-method memory profiles.
+
 ## Release-Hardening Snapshot
 
 The latest release-hardening artifacts were generated with:
@@ -67,7 +85,7 @@ PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.stable_partition_benc
 PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.cover_bench --seeds 5 --budgets 512 --output-dir results/raw/release_hardening_2026-05-18/cover
 ```
 
-These runs report 95% confidence intervals and Python `tracemalloc` peak memory. The memory value is process-level Python allocation tracking, not full resident-set-size profiling.
+These older runs report 95% confidence intervals and Python `tracemalloc` peak memory. They are retained as historical release-hardening artifacts.
 
 ## Deep-Validation Snapshot
 
@@ -85,7 +103,7 @@ PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.geometry_bench --outp
 PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.performance_scaling --stable-sizes 1000,5000,20000,50000 --cover-budgets 128,256,512,1024,2048 --output-dir results/raw/deep_validation_2026-05-18/performance_scaling
 ```
 
-Those runs are interpreted in `results/README.md` and `results/summary_tables/`. They narrow several claims: RDT stable partitioning is stronger after the expanded run, RDT-cover is weaker against Hypothesis and powers-only controls, residual sampling remains research-only, and geometry validation is bounded rather than generally superior to QMC.
+Those runs are retained for residual sampling and geometry validation context. The stable partition, RDT-cover, and performance summaries now use the newer submission-validation artifacts.
 
 ## Datasets
 
@@ -93,8 +111,11 @@ The checked-in raw results reference:
 
 - synthetic spatial datasets generated from fixed seeds,
 - seeded numerical edge-case predicates,
+- property-style floating-point checks,
 - synthetic residual fields,
 - California Housing from scikit-learn,
+- sklearn digits and breast-cancer datasets,
+- public US cities latitude/longitude points from Plotly's datasets repository,
 - Numenta Anomaly Benchmark ambient temperature data,
 - Project Gutenberg Alice text.
 
@@ -106,7 +127,7 @@ Raw benchmark artifacts live in `results/raw/`. They include JSON, CSV, and Mark
 
 ## Seeds
 
-The release-hardening run uses seeds `0..4` where repeated trials were used. The deep-validation run uses seeds `0..2` for the larger matrix of datasets, resize pairs, and coverage budgets. The public smoke commands default to smaller runs so a reviewer can verify the code quickly.
+The submission-validation run uses seeds `0..9` where repeated trials were used. Older release-hardening artifacts use seeds `0..4`; older deep-validation artifacts use seeds `0..2`. The public smoke commands default to smaller runs so a reviewer can verify the code quickly.
 
 ## Verification Checklist
 

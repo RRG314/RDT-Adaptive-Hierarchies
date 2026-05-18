@@ -51,8 +51,8 @@ The current evidence snapshot is from repeated local benchmark runs on 2026-05-1
 
 | Area | Current evidence | Interpretation |
 |---|---|---|
-| Stable partitioning | In the deep validation run, RDT stable labels had the best combined movement/locality/load score in `40/40` dataset/resize tasks against hash, spatial-ordering, geospatial, grid, remapped-label, and null-control baselines. | Strongest current direction. The claim is a tradeoff claim, not raw speed superiority. |
-| RDT-cover | On the expanded 14-class seeded corpus at budget `1024`, Hypothesis-targeted found `13/14` classes, powers-only found `11/14`, RDT-cover found `10/14`, and blind random/Sobol/Halton/Latin found `4/14`. | Useful deterministic edge-case generator, but narrower than before. Power/scale anchors explain much of the gain, and Hypothesis is stronger when predicates are known. |
+| Stable partitioning | In the submission-validation run, RDT stable labels had the best combined movement/locality/load score in `60/60` dataset/resize tasks across 10 seeds, including public US cities, California Housing coordinates, sklearn digits, and breast-cancer feature workloads. | Strongest current direction. The claim is a tradeoff claim, not raw speed superiority. |
+| RDT-cover | On the expanded 14-class seeded corpus at budget `2048`, Hypothesis-targeted found `13/14` classes, powers-only found `11/14`, RDT-cover found `10/14`, and blind random/Sobol/Halton/Latin found `4/14`. A separate property benchmark found RDT-cover useful on several floating-point traps but not on the tangent-periodicity case. | Useful deterministic edge-case generator, but narrower than before. Power/scale anchors explain much of the gain, and Hypothesis is stronger when predicates are known. |
 | Geometry validation | Recursive-depth schedule still passes selected known-form checks, but Sobol/QMC dominates several simple integration tests. | Bounded numerical validation result, not a new geometry theory. |
 | Residual sampling | RDT variants win on selected synthetic fields, but lose to greedy or stratified baselines on oscillatory, multi-front, and real California residual fields. | Research-only. No PDE/PINN training claim is supported. |
 | Shell drift | Some synthetic shifts are detected, but simple histogram and mean/std baselines are competitive or better. | Diagnostic-only. Not an anomaly detector claim. |
@@ -66,14 +66,14 @@ The stable partition benchmark resizes from `k1` buckets to `k2` buckets. Lower 
 
 `movement + 0.45 * locality + 0.20 * max(0, imbalance - 1)`.
 
-On California Housing coordinates (`n = 20,640`):
+On California Housing coordinates in the 10-seed submission-validation run:
 
-| Resize | RDT stable | Jump Hash | Morton sort | Principal sort |
-|---|---:|---:|---:|---:|
-| 16 -> 20 | 0.4686 | 0.6746 | 0.9208 | 0.8939 |
-| 32 -> 40 | 0.4695 | 0.7174 | 0.9682 | 0.9531 |
-| 64 -> 80 | 0.4706 | 0.7219 | 0.9889 | 0.9846 |
-| 128 -> 160 | 0.4514 | 0.7544 | 0.9971 | 0.9991 |
+| Resize | RDT stable | Jump Hash | Rendezvous Hash | Virtual-node hash | H3 | S2 | Morton sort |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 16 -> 20 | 0.4673 | 0.6748 | 0.6761 | 0.7568 | 0.9068 | 0.9376 | 0.9210 |
+| 32 -> 40 | 0.4698 | 0.7177 | 0.6807 | 0.7391 | 0.9632 | 0.9762 | 0.9670 |
+| 64 -> 80 | 0.4728 | 0.7218 | 0.7757 | 0.7413 | 0.9892 | 0.9916 | 0.9887 |
+| 128 -> 160 | 0.4464 | 0.7540 | 0.7540 | 0.8048 | 0.9989 | 0.9988 | 0.9973 |
 
 ![California Housing resize score](docs/figures/stable_partition_real.svg)
 
@@ -83,37 +83,45 @@ The mechanism ablation matters. Remapping labels from centroids loses badly agai
 
 This does not mean RDT is the fastest partitioner. In timing checks, grid and Morton ordering were faster. The current value is the measured tradeoff: lower movement than spatial orderings, much better locality than hash-only baselines, and acceptable load balance in the tested tasks.
 
-The release-hardening benchmark adds Hilbert, H3, S2, geohash, and virtual-node consistent hashing on 5 synthetic seeds. RDT stable labels remain the best combined score in the tested uniform, clustered, and diagonal datasets:
+The broader submission-validation benchmark covers 12 workloads and five resize pairs over 10 seeds. It runs expensive rendezvous hashing on the geospatial workload slice and keeps the full broad matrix reproducible by using the faster strong-baseline set elsewhere.
 
-| Dataset | RDT stable | Rendezvous | Jump Hash | Virtual-node hash | Best spatial ordering |
-|---|---:|---:|---:|---:|---:|
-| Uniform | 0.2005 ± 0.0003 | 0.6622 ± 0.0003 | 0.6757 ± 0.0001 | 0.7346 ± 0.0004 | Hilbert 0.9050 ± 0.0003 |
-| Clustered | 0.2739 ± 0.0202 | 0.6628 ± 0.0002 | 0.6760 ± 0.0002 | 0.7347 ± 0.0002 | Morton 0.9012 ± 0.0014 |
-| Diagonal | 0.1784 ± 0.0002 | 0.6627 ± 0.0004 | 0.6758 ± 0.0001 | 0.7346 ± 0.0004 | Principal sort 0.8771 ± 0.0000 |
+| Method | Mean combined score across broad matrix |
+|---|---:|
+| RDT stable | 0.3263 |
+| Jump Hash | 0.7085 |
+| Virtual-node hash | 0.7606 |
+| Hilbert sort | 0.9801 |
+| Morton sort | 0.9896 |
+| Principal sort | 1.0347 |
+| RDT remapped-label ablation | 1.0402 |
+| Random labels | 1.4747 |
+| Same-count shuffled labels | 1.5224 |
 
-Peak Python memory in that run was about `26,957 KiB`. This is process-level `tracemalloc` peak memory for the benchmark run, not a per-method resident-set-size profile.
+Peak resident-set-size snapshots in the broad run were about `133 MiB`; the scaling run also records `tracemalloc` and RSS snapshots. This is still process-level profiling, not isolated per-method memory accounting.
 
 ### RDT-Cover
 
 The RDT-cover benchmark generates numeric test inputs and counts predeclared edge-case classes. The expanded corpus now includes zero boundary, near-zero division, overflow-adjacent values, underflow-adjacent values, cancellation, powers of ten, powers of two, square-root and log-domain boundaries, trigonometric periodic boundaries, outer corners, thin annuli, near-singular matrices, and ill-conditioned vectors.
 
-At budget `1024` on the deep-validation run:
+At budget `2048` on the submission-validation run:
 
 | Method | Mean classes found | Mean total hits |
 |---|---:|---:|
-| Hypothesis-targeted | 13.00 | 1294.33 |
-| Powers-only ablation | 11.00 | 661.33 |
-| RDT full | 10.00 | 199.67 |
-| Boundary-only ablation | 9.00 | 306.67 |
-| RDT+Sobol | 9.00 | 256.33 |
-| Random uniform | 4.00 | 278.33 |
-| Sobol | 4.00 | 268.67 |
-| Halton | 4.00 | 270.67 |
-| Latin hypercube | 4.00 | 272.33 |
+| Hypothesis-targeted | 13.00 | 2562.00 |
+| Powers-only ablation | 11.00 | 920.50 |
+| RDT full | 10.00 | 274.60 |
+| Boundary-only ablation | 9.00 | 561.30 |
+| RDT+Sobol | 9.00 | 418.10 |
+| Random uniform | 4.00 | 532.70 |
+| Sobol | 4.00 | 539.20 |
+| Halton | 4.00 | 539.00 |
+| Latin hypercube | 4.00 | 539.40 |
 
 ![RDT-cover edge-case discovery](docs/figures/coverage_ablation.svg)
 
-This result supports RDT-cover as an edge-case complement to random and low-discrepancy sampling. It also narrows the claim. The powers-only ablation found more classes than full RDT-cover on this corpus, so power and scale anchors explain much of the useful behavior. Hypothesis-targeted coverage found the most classes because it uses predicate-aware strategies. The correct claim is therefore: RDT-cover is a deterministic multiscale schedule that can improve blind coverage, not a replacement for property-based testing or tuned edge-case strategies.
+This result supports RDT-cover as an edge-case complement to random and low-discrepancy sampling. It also narrows the claim. The powers-only ablation found more classes than full RDT-cover on this corpus, so power and scale anchors explain much of the useful behavior. Hypothesis-targeted coverage found the most classes because it uses predicate-aware strategies.
+
+The property benchmark tells the same story in a different way. RDT-cover found failures in the division, overflow, log/exp, and near-singular-matrix checks, but it did not find the tangent-periodicity failure at budget `512`. That keeps the correct claim narrow: RDT-cover is a deterministic multiscale schedule that can improve blind coverage, not a replacement for property-based testing, fuzzing, or tuned edge-case strategies.
 
 ### Residual Sampling Failure Case
 
@@ -190,7 +198,7 @@ Tests:
 PYTHONPATH=src pytest -q
 ```
 
-Current local validation: `18 passed`.
+Current local validation: `23 passed`.
 
 GitHub Actions runs tests on Python 3.11 and 3.12, executes public examples, runs benchmark smoke checks, and builds source/wheel distributions.
 

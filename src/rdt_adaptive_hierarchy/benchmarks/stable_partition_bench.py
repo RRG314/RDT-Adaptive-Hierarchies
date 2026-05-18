@@ -7,12 +7,16 @@ import csv
 import json
 import tracemalloc
 from dataclasses import asdict
+from functools import lru_cache
+from io import StringIO
 from pathlib import Path
 from typing import Dict, List
+from urllib.request import urlopen
 
 import numpy as np
 
 from ..applications.stable_partition import benchmark_partition_methods
+from .memory import process_rss_kib
 
 
 def make_spatial_dataset(name: str, n: int = 5_000, seed: int = 0) -> np.ndarray:
@@ -59,7 +63,72 @@ def make_spatial_dataset(name: str, n: int = 5_000, seed: int = 0) -> np.ndarray
         mins = np.min(points, axis=0)
         span = np.maximum(np.ptp(points, axis=0), 1e-12)
         return (points - mins) / span
+    if name == "us_cities":
+        points = _load_us_cities()
+        if n < len(points):
+            idx = rng.choice(len(points), size=n, replace=False)
+            points = points[idx]
+        return _normalize_columns(points)
+    if name == "digits_pca2":
+        try:
+            from sklearn.datasets import load_digits  # type: ignore
+            from sklearn.decomposition import PCA  # type: ignore
+            from sklearn.preprocessing import StandardScaler  # type: ignore
+        except ImportError as exc:  # pragma: no cover
+            raise RuntimeError("digits_pca2 requires scikit-learn") from exc
+        data = load_digits().data
+        if n < len(data):
+            idx = rng.choice(len(data), size=n, replace=False)
+            data = data[idx]
+        scaled = StandardScaler().fit_transform(data)
+        return _normalize_columns(PCA(n_components=2, random_state=seed).fit_transform(scaled))
+    if name == "digits_64d":
+        try:
+            from sklearn.datasets import load_digits  # type: ignore
+        except ImportError as exc:  # pragma: no cover
+            raise RuntimeError("digits_64d requires scikit-learn") from exc
+        data = load_digits().data
+        if n < len(data):
+            idx = rng.choice(len(data), size=n, replace=False)
+            data = data[idx]
+        return _normalize_columns(data)
+    if name == "breast_cancer_features":
+        try:
+            from sklearn.datasets import load_breast_cancer  # type: ignore
+        except ImportError as exc:  # pragma: no cover
+            raise RuntimeError("breast_cancer_features requires scikit-learn") from exc
+        data = load_breast_cancer().data
+        if n < len(data):
+            idx = rng.choice(len(data), size=n, replace=False)
+            data = data[idx]
+        return _normalize_columns(data)
     raise ValueError(f"unknown dataset {name!r}")
+
+
+def _normalize_columns(points: np.ndarray) -> np.ndarray:
+    x = np.asarray(points, dtype=float)
+    mins = np.min(x, axis=0)
+    span = np.maximum(np.ptp(x, axis=0), 1e-12)
+    return (x - mins) / span
+
+
+@lru_cache(maxsize=1)
+def _load_us_cities() -> np.ndarray:
+    """Load public US city latitude/longitude points from Plotly's datasets repo."""
+
+    url = "https://raw.githubusercontent.com/plotly/datasets/master/2014_us_cities.csv"
+    with urlopen(url, timeout=20) as response:
+        text = response.read().decode("utf-8")
+    reader = csv.DictReader(StringIO(text))
+    rows = []
+    for row in reader:
+        try:
+            rows.append((float(row["lat"]), float(row["lon"])))
+        except (KeyError, TypeError, ValueError):
+            continue
+    if not rows:
+        raise RuntimeError("US cities dataset did not contain lat/lon rows")
+    return np.asarray(rows, dtype=float)
 
 
 def run(
@@ -68,6 +137,8 @@ def run(
     n: int = 5_000,
     datasets: List[str] | None = None,
     resize_pairs: List[tuple[int, int]] | None = None,
+    geospatial_baselines: str = "geospatial",
+    rendezvous_baseline: bool = True,
 ) -> Dict[str, object]:
     """Run stable partition benchmarks and write JSON/CSV/Markdown artifacts."""
 
@@ -78,11 +149,21 @@ def run(
     if resize_pairs is None:
         resize_pairs = [(16, 20)]
     tracemalloc.start()
+    rss_start_kib = process_rss_kib()
     for seed in range(seeds):
         for dataset in datasets:
             points = make_spatial_dataset(dataset, n=n, seed=seed)
+            include_geo = _include_geospatial_baselines(dataset, geospatial_baselines)
             for k1, k2 in resize_pairs:
-                for result in benchmark_partition_methods(points, dataset=dataset, k1=k1, k2=k2, seed=seed).values():
+                for result in benchmark_partition_methods(
+                    points,
+                    dataset=dataset,
+                    k1=k1,
+                    k2=k2,
+                    seed=seed,
+                    include_optional_geospatial=include_geo,
+                    include_rendezvous=rendezvous_baseline,
+                ).values():
                     row = {"seed": seed, **asdict(result)}
                     row["combined_score_lower_is_better"] = (
                         row["movement"] + 0.45 * row["locality_k2"] + 0.20 * max(0.0, row["imbalance_k2"] - 1.0)
@@ -94,15 +175,40 @@ def run(
                         row["movement"] + 1.00 * row["locality_k2"] + 0.20 * max(0.0, row["imbalance_k2"] - 1.0)
                     )
                     row["python_peak_memory_kib"] = float(tracemalloc.get_traced_memory()[1] / 1024.0)
+                    row["process_rss_kib"] = process_rss_kib()
                     rows.append(row)
     peak_kib = float(tracemalloc.get_traced_memory()[1] / 1024.0)
+    rss_end_kib = process_rss_kib()
     tracemalloc.stop()
     summary = _summarize(rows)
-    result = {"benchmark": "stable_partition", "rows": rows, "summary": summary, "peak_memory_kib": peak_kib}
+    result = {
+        "benchmark": "stable_partition",
+        "geospatial_baselines": geospatial_baselines,
+        "rendezvous_baseline": rendezvous_baseline,
+        "rows": rows,
+        "summary": summary,
+        "peak_memory_kib": peak_kib,
+        "rss_start_kib": rss_start_kib,
+        "rss_end_kib": rss_end_kib,
+        "rss_delta_kib": rss_end_kib - rss_start_kib,
+    }
     (output_dir / "stable_partition_results.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
     _write_csv(output_dir / "stable_partition_summary.csv", rows)
     (output_dir / "STABLE_PARTITION_RESULT_CARD.md").write_text(_render_markdown(summary), encoding="utf-8")
     return result
+
+
+def _include_geospatial_baselines(dataset: str, mode: str) -> bool:
+    """Decide where optional geographic-cell baselines are meaningful."""
+
+    normalized = mode.strip().lower()
+    if normalized == "always":
+        return True
+    if normalized in {"off", "none", "false", "0"}:
+        return False
+    if normalized in {"geospatial", "auto"}:
+        return dataset in {"california_housing", "us_cities"}
+    raise ValueError("geospatial_baselines must be one of: geospatial, always, off")
 
 
 def _summarize(rows: List[dict]) -> List[dict]:
@@ -136,6 +242,7 @@ def _summarize(rows: List[dict]) -> List[dict]:
                     "build_seconds_mean": float(np.mean([row["build_seconds"] for row in group])),
                     "assign_seconds_mean": float(np.mean([row["assign_seconds"] for row in group])),
                     "python_peak_memory_kib_max": float(max(row.get("python_peak_memory_kib", 0.0) for row in group)),
+                    "process_rss_kib_max": float(max(row.get("process_rss_kib", 0.0) for row in group)),
                 })
     return out
 
@@ -160,7 +267,7 @@ def _render_markdown(summary: List[dict]) -> str:
         "",
         "Lower combined score is better. The score is movement + 0.45 * locality + 0.20 * load penalty.",
         "",
-        "| Dataset | Resize | Best method | RDT score ±95% CI | Jump score ±95% CI | Morton score ±95% CI | Peak Python memory KiB |",
+        "| Dataset | Resize | Best method | RDT score ±95% CI | Jump score ±95% CI | Morton score ±95% CI | Peak RSS KiB |",
         "|---|---:|---|---:|---:|---:|---:|",
     ]
     for dataset in sorted({row["dataset"] for row in summary}):
@@ -174,7 +281,7 @@ def _render_markdown(summary: List[dict]) -> str:
                 f"| {dataset} | {k1} -> {k2} | `{best['method']}` | {rdt['combined_score_mean']:.4f} ± {rdt['combined_score_ci95']:.4f} | "
                 f"{jump['combined_score_mean']:.4f} ± {jump['combined_score_ci95']:.4f} | "
                 f"{morton['combined_score_mean']:.4f} ± {morton['combined_score_ci95']:.4f} | "
-                f"{max(row['python_peak_memory_kib_max'] for row in group):.0f} |"
+                f"{max(row['process_rss_kib_max'] for row in group):.0f} |"
             )
     return "\n".join(lines) + "\n"
 
@@ -186,6 +293,18 @@ def main() -> None:
     parser.add_argument("--n", type=int, default=5_000)
     parser.add_argument("--datasets", default="", help="Comma-separated dataset names; default uses the smoke set.")
     parser.add_argument("--resize-pairs", default="", help="Comma-separated resize pairs like 8:10,16:20.")
+    parser.add_argument(
+        "--geospatial-baselines",
+        default="geospatial",
+        choices=["geospatial", "always", "off"],
+        help="Run H3/S2/geohash baselines on geospatial datasets only, all datasets, or not at all.",
+    )
+    parser.add_argument(
+        "--rendezvous-baseline",
+        default="on",
+        choices=["on", "off"],
+        help="Include rendezvous hashing. It is a strong movement baseline but expensive at large bucket counts.",
+    )
     args = parser.parse_args()
     datasets = [part.strip() for part in args.datasets.split(",") if part.strip()] or None
     resize_pairs = [
@@ -193,7 +312,15 @@ def main() -> None:
         for part in args.resize_pairs.split(",")
         if part.strip()
     ] or None
-    run(Path(args.output_dir), seeds=args.seeds, n=args.n, datasets=datasets, resize_pairs=resize_pairs)
+    run(
+        Path(args.output_dir),
+        seeds=args.seeds,
+        n=args.n,
+        datasets=datasets,
+        resize_pairs=resize_pairs,
+        geospatial_baselines=args.geospatial_baselines,
+        rendezvous_baseline=args.rendezvous_baseline == "on",
+    )
     print(f"Wrote stable partition benchmark results to {args.output_dir}")
 
 

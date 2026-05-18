@@ -117,10 +117,10 @@ Current key result on California Housing:
 
 | Resize | RDT stable | Jump Hash | Morton sort |
 |---|---:|---:|---:|
-| 16 -> 20 | 0.4686 | 0.6746 | 0.9208 |
-| 32 -> 40 | 0.4695 | 0.7174 | 0.9682 |
-| 64 -> 80 | 0.4706 | 0.7219 | 0.9889 |
-| 128 -> 160 | 0.4514 | 0.7544 | 0.9971 |
+| 16 -> 20 | 0.4673 | 0.6748 | 0.9210 |
+| 32 -> 40 | 0.4698 | 0.7177 | 0.9670 |
+| 64 -> 80 | 0.4728 | 0.7218 | 0.9887 |
+| 128 -> 160 | 0.4464 | 0.7540 | 0.9973 |
 
 ### 6. RDT-Cover
 
@@ -135,7 +135,7 @@ Define the coverage schedule:
 - shell-like jitter,
 - optional Sobol fill.
 
-Current key result at budget `1024` on the expanded 14-class corpus:
+Current key result at budget `2048` on the expanded 14-class corpus:
 
 | Method | Mean edge-case classes found |
 |---|---:|
