@@ -2,6 +2,12 @@
 
 This repository is a cleaned package derived from earlier local RDT experiments and benchmark runs. Original notebooks, Google Drive files, extraction archives, and unrelated repositories are not part of this package.
 
+## Conceptual Origin
+
+The Recursive Division Tree line of work began with Steven Reid's Zenodo preprint *Recursive Division Tree: A Log-Log Algorithm for Integer Depth*, DOI `10.5281/zenodo.18012166`. That preprint treated RDT as an integer-depth construction. This repository narrows the idea into a software framework over finite numeric point sets: cells, depth, paths, stable labels, resize operations, and deterministic coverage schedules.
+
+The repository should therefore be cited as a later computational framework derived from the RDT research line, not as a replacement for the integer-depth preprint.
+
 ## Active Code
 
 | Current file | Source lineage | Status |

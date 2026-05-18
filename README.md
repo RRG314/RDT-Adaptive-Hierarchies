@@ -11,6 +11,12 @@ The repo also includes bounded experimental modules for recursive-depth geometry
 
 ![Stable label inheritance mechanism](docs/figures/rdt_stable_label_mechanism.svg)
 
+## Origin
+
+The Recursive Division Tree line of work began with Steven Reid's Zenodo preprint *Recursive Division Tree: A Log-Log Algorithm for Integer Depth* (DOI `10.5281/zenodo.18012166`). That earlier work studied recursive depth on positive integers. This repository is a later narrowing of the idea into a computational hierarchy over finite numeric point sets.
+
+The important change is scope. The preprint motivates depth and shell structure; this package asks which recursive metadata survives baseline comparison and ablation. The answer here is narrower: stable labels for resize partitioning and deterministic coverage schedules for numerical edge cases.
+
 ## Why This Exists
 
 Many systems need to assign points, keys, tasks, or regions to buckets. When the bucket count changes, the assignment should not move everything. Consistent hashing methods are good at minimizing movement, but they normally do not preserve spatial locality. Spatial orderings and grids can preserve locality, but they can move many points during resize or create load imbalance.
@@ -169,7 +175,7 @@ Current local validation: `14 passed`.
 | `examples/` | Short scripts that show the public API. |
 | `docs/` | Definitions, framework specification, claims, limitations, prior work, reproducibility. |
 | `results/` | Interpreted summaries and raw benchmark artifacts. |
-| `paper/` | Working methods-paper draft material. |
+| `paper/` | Complete Markdown draft, references, and methods-paper notes. |
 
 ## What Is Not Claimed
 

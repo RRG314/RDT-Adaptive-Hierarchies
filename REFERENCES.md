@@ -2,6 +2,7 @@
 
 ## Research Data And Reproducibility
 
+- Reid, S. "Recursive Division Tree: A Log-Log Algorithm for Integer Depth." Zenodo, Version v2, 2025. <https://doi.org/10.5281/zenodo.18012166>
 - GO FAIR. FAIR Principles. <https://www.go-fair.org/fair-principles>
 - Wilkinson, M. D. et al. "The FAIR Guiding Principles for scientific data management and stewardship." Scientific Data 3, 160018 (2016). <https://www.nature.com/articles/sdata201618>
 
