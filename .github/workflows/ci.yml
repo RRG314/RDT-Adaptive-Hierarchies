@@ -46,3 +46,6 @@ jobs:
 
       - name: Build source and wheel distributions
         run: python -m build
+
+      - name: Check package metadata and README rendering
+        run: python -m twine check dist/*
