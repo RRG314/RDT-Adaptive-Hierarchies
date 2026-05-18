@@ -309,8 +309,9 @@ class RDTStablePartition:
         return locality_dispersion(np.asarray(points, dtype=float), self.assign(points, buckets))
 
 
-def benchmark_partition_methods(points: np.ndarray, dataset: str, k1: int = 16, k2: int = 20) -> Dict[str, PartitionBenchmarkResult]:
+def benchmark_partition_methods(points: np.ndarray, dataset: str, k1: int = 16, k2: int = 20, seed: int = 0) -> Dict[str, PartitionBenchmarkResult]:
     x = np.asarray(points, dtype=float)
+    rng = np.random.default_rng(seed)
     keys = np.array([stable_key_from_index(i) for i in range(x.shape[0])], dtype=object)
     results: Dict[str, PartitionBenchmarkResult] = {}
 
@@ -324,6 +325,35 @@ def benchmark_partition_methods(points: np.ndarray, dataset: str, k1: int = 16, 
     results["rdt_stable"] = PartitionBenchmarkResult(
         "rdt_stable", dataset, len(x), k1, k2, movement_fraction(labels1, labels2),
         load_imbalance(labels2), locality_dispersion(x, labels2), build, assign,
+    )
+
+    start = perf_counter()
+    labels1 = _remapped_centroid_labels(x, rdt, k1)
+    labels2 = _remapped_centroid_labels(x, rdt, k2)
+    assign = perf_counter() - start
+    results["rdt_remapped_centroid"] = PartitionBenchmarkResult(
+        "rdt_remapped_centroid", dataset, len(x), k1, k2, movement_fraction(labels1, labels2),
+        load_imbalance(labels2), locality_dispersion(x, labels2), 0.0, assign,
+    )
+
+    start = perf_counter()
+    labels1 = rdt.assign_training(k1).copy()
+    labels2 = rdt.assign_training(k2).copy()
+    rng.shuffle(labels1)
+    rng.shuffle(labels2)
+    assign = perf_counter() - start
+    results["same_counts_shuffled_labels"] = PartitionBenchmarkResult(
+        "same_counts_shuffled_labels", dataset, len(x), k1, k2, movement_fraction(labels1, labels2),
+        load_imbalance(labels2), locality_dispersion(x, labels2), 0.0, assign,
+    )
+
+    start = perf_counter()
+    labels1 = rng.integers(0, k1, size=len(x), dtype=np.int64)
+    labels2 = rng.integers(0, k2, size=len(x), dtype=np.int64)
+    assign = perf_counter() - start
+    results["random_labels"] = PartitionBenchmarkResult(
+        "random_labels", dataset, len(x), k1, k2, movement_fraction(labels1, labels2),
+        load_imbalance(labels2), locality_dispersion(x, labels2), 0.0, assign,
     )
 
     for name, func in {
@@ -389,3 +419,19 @@ def benchmark_partition_methods(points: np.ndarray, dataset: str, k1: int = 16, 
             load_imbalance(labels2), locality_dispersion(x, labels2), 0.0, assign,
         )
     return results
+
+
+def _remapped_centroid_labels(points: np.ndarray, partitioner: RDTStablePartition, buckets: int) -> np.ndarray:
+    """Ablation: keep the RDT tree but discard stable inherited labels."""
+
+    active = partitioner.hierarchy.active_nodes(buckets)
+    centroids = []
+    for node_id in active:
+        idx = partitioner.hierarchy.nodes[node_id].indices
+        centroid = np.mean(points[idx, :2], axis=0)
+        centroids.append((float(centroid[0]), float(centroid[1]), node_id))
+    remap = {node_id: label for label, (_, _, node_id) in enumerate(sorted(centroids))}
+    labels = np.empty(points.shape[0], dtype=np.int64)
+    for node_id in active:
+        labels[partitioner.hierarchy.nodes[node_id].indices] = remap[node_id]
+    return labels

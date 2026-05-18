@@ -2,6 +2,7 @@
 
 from .grid import grid_partition
 from .geospatial import geohash_sort_partition, h3_sort_partition, s2_sort_partition
+from .halton import halton_cover
 from .hilbert import hilbert_codes, hilbert_sort_partition
 from .hypothesis_sampling import hypothesis_cover
 from .jump_hash import jump_consistent_hash
@@ -15,6 +16,7 @@ __all__ = [
     "geohash_sort_partition",
     "grid_partition",
     "h3_sort_partition",
+    "halton_cover",
     "hilbert_codes",
     "hilbert_sort_partition",
     "hypothesis_cover",

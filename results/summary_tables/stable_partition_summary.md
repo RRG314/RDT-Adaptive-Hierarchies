@@ -1,57 +1,32 @@
 # Stable Partition Summary
 
-![California Housing resize score](../../docs/figures/stable_partition_real.svg)
+Deep validation run: `results/raw/deep_validation_2026-05-18/stable_partition/`.
 
-## Setup
+The stable partition result became stronger in this pass. RDT stable labels were the best combined movement/locality/load score in `40` of `40` dataset/resize tasks. The run covered 8 datasets, 5 resize pairs, 3 seeds, geospatial baselines, hash baselines, spatial-order baselines, a remapped-label ablation, shuffled-label null control, and random-label null control.
 
-Task: resize partition labels while balancing movement, locality, and load.
+Allowed interpretation: stable ancestor-label inheritance gives a useful movement/locality/load tradeoff in the tested resize tasks. This remains a tradeoff claim, not a raw speed claim.
 
-Metric: lower combined score is better:
+| dataset | resize | best | rdt | jump | remap |
+|---|---|---|---|---|---|
+| anisotropic_gaussian | 16 -> 20 | rdt_stable | 0.1968 | 0.6738 | 0.8943 |
+| anisotropic_gaussian | 128 -> 160 | rdt_stable | 0.4722 | 0.7532 | 1.2417 |
+| california_housing | 16 -> 20 | rdt_stable | 0.4686 | 0.6746 | 1.2806 |
+| california_housing | 128 -> 160 | rdt_stable | 0.4514 | 0.7544 | 1.2598 |
+| clustered | 16 -> 20 | rdt_stable | 0.2511 | 0.6746 | 0.9173 |
+| clustered | 128 -> 160 | rdt_stable | 0.4899 | 0.7531 | 1.2823 |
+| diagonal | 16 -> 20 | rdt_stable | 0.1788 | 0.6750 | 0.8766 |
+| diagonal | 128 -> 160 | rdt_stable | 0.1934 | 0.7558 | 1.0475 |
+| hotspot_tail | 16 -> 20 | rdt_stable | 0.2340 | 0.6753 | 0.9840 |
+| hotspot_tail | 128 -> 160 | rdt_stable | 0.4870 | 0.7509 | 1.2770 |
+| ring_annulus | 16 -> 20 | rdt_stable | 0.1878 | 0.6744 | 0.7813 |
+| ring_annulus | 128 -> 160 | rdt_stable | 0.1929 | 0.7543 | 1.0319 |
+| two_clusters_imbalance | 16 -> 20 | rdt_stable | 0.2049 | 0.6753 | 0.8038 |
+| two_clusters_imbalance | 128 -> 160 | rdt_stable | 0.4989 | 0.7476 | 1.2828 |
+| uniform | 16 -> 20 | rdt_stable | 0.2005 | 0.6744 | 0.9190 |
+| uniform | 128 -> 160 | rdt_stable | 0.1873 | 0.7544 | 1.0099 |
 
-`movement + 0.45 * locality + 0.20 * max(0, imbalance - 1)`.
+Raw artifacts:
 
-Baselines: Jump Hash, virtual-node consistent hashing, rendezvous hashing, Morton sort, Hilbert sort, H3, S2, geohash, grid, principal sort, and modulo hash.
-
-## Main Result
-
-On real California Housing coordinates:
-
-| Resize | RDT stable | Jump Hash | Morton |
-|---|---:|---:|---:|
-| 16->20 | 0.4386 | 0.6583 | 0.9195 |
-| 32->40 | 0.4945 | 0.6664 | 0.9674 |
-| 64->80 | 0.4641 | 0.6790 | 0.9830 |
-
-The stable-label ablation is stronger evidence than the headline score. Remapped labels lose on every tested resize task, which supports the claim that ancestor-label inheritance is doing real work.
-
-![Stable label ablation](../../docs/figures/stable_partition_ablation.svg)
-
-## What The Numbers Mean
-
-Jump Hash has low movement but weak locality because it hashes labels without using geometry. Morton sort preserves spatial order but moves many points under the tested resize. RDT stable labels keep enough ancestry to reduce movement while preserving more locality than the hash baselines.
-
-## Limitations
-
-RDT is not the fastest raw method. In 50k synthetic timing checks, grid and Morton were faster. The current claim is a tradeoff claim, not a speed claim.
-
-## Release-Hardening Baselines
-
-The 2026-05-18 release-hardening run adds Hilbert ordering, H3 ordering, S2 ordering, geohash ordering, and virtual-node consistent hashing. RDT stable labels remained the best combined score on the tested synthetic datasets:
-
-| Dataset | RDT stable | Jump Hash | Virtual-node hash | Best added spatial baseline |
-|---|---:|---:|---:|---:|
-| uniform | 0.2005 ± 0.0003 | 0.6757 ± 0.0001 | 0.7346 ± 0.0004 | Hilbert 0.9050 ± 0.0003 |
-| clustered | 0.2739 ± 0.0202 | 0.6760 ± 0.0002 | 0.7347 ± 0.0002 | Morton 0.9012 ± 0.0014 |
-| diagonal | 0.1784 ± 0.0002 | 0.6758 ± 0.0001 | 0.7346 ± 0.0004 | Principal sort 0.8771 ± 0.0000 |
-
-Peak Python memory in this run was about `26,957 KiB`.
-
-Remaining missing work includes larger real workloads, memory RSS profiling, and production-style virtual-node tuning.
-
-## Raw Artifacts
-
-- `results/raw/reproduce_deep_5seed_2026-05-18/aggregate_results.json`
-- `results/raw/reproduce_deep_5seed_2026-05-18/aggregate_summary.csv`
-- `results/raw/real_public_data_2026-05-18/real_public_data_results.json`
-- `results/raw/artifact_performance_5seed_2026-05-18/artifact_check_results.json`
-- `results/raw/release_hardening_2026-05-18/stable_partition/stable_partition_results.json`
+- `results/raw/deep_validation_2026-05-18/stable_partition/stable_partition_results.json`
+- `results/raw/deep_validation_2026-05-18/stable_partition/stable_partition_summary.csv`
+- `results/raw/deep_validation_2026-05-18/stable_partition/STABLE_PARTITION_RESULT_CARD.md`

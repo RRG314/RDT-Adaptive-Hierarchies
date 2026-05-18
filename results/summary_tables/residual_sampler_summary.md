@@ -1,33 +1,19 @@
 # Residual Sampler Summary
 
-![Residual sampler real-data failure](../../docs/figures/residual_real.svg)
+Deep validation run: `results/raw/deep_validation_2026-05-18/residual_sampler/`.
 
-## Setup
+Residual sampling remains research-only. RDT variants help on selected synthetic fields, but they lose on the real California residual field and do not dominate greedy residual baselines. This result weakens any broad residual-sampling claim and preserves only a narrow diagnostic/research use.
 
-Task: select candidate points from residual fields using residual score, gradient proxy, and coverage pressure.
+| field | best | best_score | rdt_tuned | top_residual |
+|---|---|---|---|---|
+| california_residual | top_residual | 0.6869 | 0.4463 | 0.6869 |
+| multi_front | top_residual_gradient | 0.7604 | 0.6855 | 0.7583 |
+| oscillatory | grid_stratified_residual | 0.8933 | 0.6196 | 0.8910 |
+| sharp_front | rdt_no_gradient | 0.7491 | 0.7426 | 0.7314 |
+| two_hotspots | rdt_residual_tuned | 0.8563 | 0.8563 | 0.6588 |
 
-Baselines: top residual, top residual plus gradient, residual proportional, uniform.
+Raw artifacts:
 
-## Main Result
-
-| Field | Winner | RDT tuned | Top residual |
-|---|---|---:|---:|
-| synthetic sharp front | RDT tuned | 0.7241 | 0.6993 |
-| synthetic two hotspots | RDT tuned | 0.7762 | 0.6381 |
-| synthetic oscillatory | top residual | 0.6280 | 0.8896 |
-| real California residual | top residual | 0.2839 | 0.4596 |
-
-## Interpretation
-
-The residual sampler is mixed. It can help when coverage matters and the field has separated hotspots, but it loses when the metric rewards aggressive selection of the largest residuals.
-
-## Limitation
-
-These are point-selection metrics. They are not PDE or PINN training results.
-
-The real California residual result is a useful negative result: the current RDT sampler should not be presented as a solver-training improvement. It should only be used as a research candidate until full training benchmarks exist.
-
-## Raw Artifacts
-
-- `results/raw/ablation_5seed_2026-05-18/ablation_results.json`
-- `results/raw/real_public_data_2026-05-18/real_public_data_results.json`
+- `results/raw/deep_validation_2026-05-18/residual_sampler/residual_sampler_results.json`
+- `results/raw/deep_validation_2026-05-18/residual_sampler/residual_sampler_summary.csv`
+- `results/raw/deep_validation_2026-05-18/residual_sampler/RESIDUAL_SAMPLER_RESULT_CARD.md`

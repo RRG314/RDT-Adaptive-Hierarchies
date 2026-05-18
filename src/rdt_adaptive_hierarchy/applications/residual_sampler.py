@@ -140,6 +140,12 @@ def synthetic_residual_field(points: np.ndarray, name: str) -> tuple[np.ndarray,
         residual = 0.25 + np.abs(np.sin(18 * px) * np.cos(15 * py))
         residual += 0.6 * np.exp(-150 * ((px - 0.85) ** 2 + (py - 0.15) ** 2))
         grad = np.abs(18 * np.cos(18 * px) * np.cos(15 * py)) + residual
+    elif name == "multi_front":
+        front_a = np.exp(-((px - 0.28) ** 2) / 0.0012)
+        front_b = np.exp(-((py - 0.68) ** 2) / 0.0018)
+        diagonal = np.exp(-((px - py + 0.12) ** 2) / 0.0015)
+        residual = 0.45 * front_a + 0.35 * front_b + 0.55 * diagonal
+        grad = front_a + front_b + diagonal
     else:
         raise ValueError(f"unknown residual field {name!r}")
     residual = residual / max(float(np.max(residual)), 1e-12)
@@ -176,6 +182,14 @@ def benchmark_residual_samplers(points: np.ndarray, field: str, n_new: int = 256
     start = perf_counter()
     selected = RDTResidualSampler(random_state=seed).select(points, residuals, gradients, n_new=n_new)
     results["rdt_residual"] = evaluate_selection(points, residuals, selected, "rdt_residual", field, perf_counter() - start)
+
+    start = perf_counter()
+    selected = RDTResidualSampler(coverage_weight=0.0, exploration_fraction=0.0, random_state=seed).select(points, residuals, gradients, n_new=n_new)
+    results["rdt_no_coverage"] = evaluate_selection(points, residuals, selected, "rdt_no_coverage", field, perf_counter() - start)
+
+    start = perf_counter()
+    selected = RDTResidualSampler(gradient_weight=0.0, random_state=seed).select(points, residuals, None, n_new=n_new)
+    results["rdt_no_gradient"] = evaluate_selection(points, residuals, selected, "rdt_no_gradient", field, perf_counter() - start)
 
     start = perf_counter()
     selected = RDTTunedResidualSampler(random_state=seed).select(points, residuals, gradients, n_new=n_new)

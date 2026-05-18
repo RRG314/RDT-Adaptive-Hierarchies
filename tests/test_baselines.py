@@ -4,6 +4,7 @@ from rdt_adaptive_hierarchy.baselines import (
     geohash_sort_partition,
     grid_partition,
     h3_sort_partition,
+    halton_cover,
     hilbert_sort_partition,
     hypothesis_cover,
     jump_consistent_hash,
@@ -45,6 +46,7 @@ def test_sampling_baselines_return_requested_budget():
     bounds = [(-1.0, 1.0), (-2.0, 2.0)]
     assert random_uniform_cover(bounds, 16, seed=0).shape == (16, 2)
     assert sobol_cover(bounds, 16, seed=0).shape == (16, 2)
+    assert halton_cover(bounds, 16, seed=0).shape == (16, 2)
 
 
 def test_virtual_node_hash_and_hypothesis_cover_run():

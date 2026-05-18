@@ -1,40 +1,26 @@
 # RDT-Cover Summary
 
-![RDT-cover edge-case discovery](../../docs/figures/coverage_ablation.svg)
+Deep validation run: `results/raw/deep_validation_2026-05-18/cover/`.
 
-## Setup
+The expanded numerical corpus has `14` seeded classes. This made the claim narrower. At budget `1024`, Hypothesis-targeted found the most classes, followed by the powers-only ablation. RDT-cover still beats blind random, Sobol, Halton, and Latin hypercube on class discovery, but the ablation shows that power/scale anchors explain a large part of the useful behavior.
 
-Task: generate numeric test points in a two-dimensional domain and count predeclared seeded edge-case classes.
+Allowed interpretation: RDT-cover is a deterministic multiscale edge-case generator that complements random, low-discrepancy, and property-based strategies. It is not generally better than Hypothesis, and it is not yet validated on real bug corpora.
 
-Edge classes include zero boundary, large cancellation, power transition, outer corner, and thin annulus.
+| method | classes | hits | first_hit | hit_rate |
+|---|---|---|---|---|
+| hypothesis_targeted | 13.00 ± 0.00 | 1294.33 ± 15.20 | 1.0 | 0.0903 |
+| powers_only | 11.00 ± 0.00 | 661.33 ± 5.35 | 1.0 | 0.0461 |
+| rdt_cover | 10.00 ± 0.00 | 199.67 ± 4.71 | 1.0 | 0.0139 |
+| boundary_only | 9.00 ± 0.00 | 306.67 ± 3.97 | 1.0 | 0.0214 |
+| rdt_hybrid_cover | 9.00 ± 0.00 | 256.33 ± 6.43 | 1.0 | 0.0179 |
+| midpoint_only | 6.00 ± 0.00 | 1669.67 ± 0.65 | 1.0 | 0.1165 |
+| random_uniform | 4.00 ± 0.00 | 278.33 ± 6.23 | 4.0 | 0.0194 |
+| latin_hypercube | 4.00 ± 0.00 | 272.33 ± 2.61 | 3.7 | 0.0190 |
+| halton | 4.00 ± 0.00 | 270.67 ± 2.61 | 6.0 | 0.0189 |
+| sobol | 4.00 ± 0.00 | 268.67 ± 2.85 | 4.0 | 0.0187 |
 
-Baselines: random uniform, Sobol, Latin hypercube, and Hypothesis-targeted coverage.
+Raw artifacts:
 
-## Main Result
-
-| Method | Mean bug classes found | Mean total hits |
-|---|---:|---:|
-| Hypothesis-targeted | 5.00 | 294.60 |
-| RDT full | 5.00 | 68.40 |
-| RDT+Sobol | 5.00 | 63.40 |
-| random uniform | 2.00 | 25.20 |
-| Sobol | 2.00 | 23.20 |
-| Latin hypercube | 1.40 | 21.80 |
-
-## Interpretation
-
-The RDT-specific components matter in the seeded corpus. Powers, midpoints, and boundaries each find part of the failure set. The hybrid keeps full bug-class discovery while improving space fill compared with RDT-only.
-
-The important result is not that RDT-cover has the lowest discrepancy. Sobol has the best discrepancy, as expected, but misses the seeded edge classes. RDT-cover intentionally spends budget on edge anchors, so its value should be judged by failure discovery at fixed budget, not fill quality alone.
-
-The Hypothesis-targeted baseline also finds all five classes and produces more total hits because it searches with predicate-aware strategies. This narrows the RDT-cover claim: RDT-cover is useful when explicit properties are not available or when a deterministic edge schedule is wanted, while Hypothesis is the stronger baseline when the properties are known.
-
-## Limitations
-
-The corpus is synthetic and designed around numerical edge classes. Real bug corpora are needed before public claims become stronger.
-
-## Raw Artifacts
-
-- `results/raw/ablation_5seed_2026-05-18/ablation_results.json`
-- `results/raw/reproduce_deep_5seed_2026-05-18/aggregate_results.json`
-- `results/raw/release_hardening_2026-05-18/cover/cover_results.json`
+- `results/raw/deep_validation_2026-05-18/cover/cover_results.json`
+- `results/raw/deep_validation_2026-05-18/cover/cover_summary.csv`
+- `results/raw/deep_validation_2026-05-18/cover/COVER_RESULT_CARD.md`

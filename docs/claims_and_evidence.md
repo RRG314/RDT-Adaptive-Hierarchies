@@ -6,9 +6,9 @@ This project keeps claims only when they have definitions, benchmark evidence, b
 
 Claim: stable ancestor-label inheritance improves the movement/locality/load tradeoff in the tested resize tasks.
 
-Evidence: in the 5-seed benchmark, RDT stable labels had the best combined score on clustered, diagonal, hotspot-tail, and uniform synthetic datasets. On California Housing coordinates, RDT stable labels had the best combined score for 16->20, 32->40, and 64->80 resize tasks. The release-hardening run adds Hilbert, H3, S2, geohash, and virtual-node consistent hashing; RDT stable labels remain best on the tested synthetic datasets.
+Evidence: in the deep-validation benchmark, RDT stable labels had the best combined score in `40` of `40` tested dataset/resize tasks. The run covered uniform, clustered, diagonal, hotspot-tail, anisotropic Gaussian, ring/annulus, two-cluster imbalance, and California Housing coordinate datasets; resize pairs `8->10`, `16->20`, `32->40`, `64->80`, and `128->160`; and hash, virtual-node hash, geospatial, spatial-order, grid, remapped-label, shuffled-label, and random-label baselines.
 
-Ablation: stable labels beat remapped labels on every tested partition task. California 16->20 scored `0.4386` for stable labels, `1.2198` for remapped labels, and `0.6583` for Jump Hash.
+Ablation: stable labels beat remapped labels on every tested partition task. In the deep-validation summary, California Housing `16->20` scored `0.4686` for stable labels, `1.2806` for remapped labels, and `0.6746` for Jump Hash. Across all rows, the mean combined score was `0.2905` for stable labels, `0.8620` for remapped labels, `1.0806` for shuffled labels with matched counts, and `1.0625` for random labels.
 
 Failure condition: the claim weakens if stable labels do not beat remapped labels or if stronger baselines match the movement/locality/load tradeoff.
 
@@ -18,13 +18,13 @@ Forbidden wording: RDT is generally better than consistent hashing, H3, S2, KDTr
 
 ## RDT-Cover Claim
 
-Claim: RDT-cover improves seeded numerical edge-case discovery in the current test corpus.
+Claim: RDT-cover is a deterministic multiscale edge-case generator that improves over blind random, low-discrepancy, and Latin hypercube sampling on the current seeded corpus, but it is not the strongest method in the expanded benchmark.
 
-Evidence: RDT full, RDT+Sobol, and Hypothesis-targeted coverage found all 5 seeded bug classes. Random, Sobol, and Latin hypercube found fewer in the release-hardening run.
+Evidence: the expanded deep-validation corpus has `14` seeded edge-case classes. At budget `1024`, Hypothesis-targeted coverage found `13` classes, the powers-only ablation found `11`, full RDT-cover found `10`, boundary-only found `9`, RDT+Sobol found `9`, and random, Sobol, Halton, and Latin hypercube each found `4`.
 
-Ablation: powers-only found 4 classes; midpoint-only and boundary-only found 3. The full schedule matters.
+Ablation: the powers-only ablation outperformed full RDT-cover on class count in this expanded corpus. This weakens the older claim that the full schedule is the clearly best deterministic construction. The useful mechanism is better described as deterministic inclusion of scale and boundary anchors, with RDT ordering providing a reproducible way to combine those anchors with shell/midpoint coverage.
 
-Failure condition: the claim weakens if adaptive random testing or a real numerical bug corpus finds the same failures faster at equal budget. The Hypothesis-targeted baseline already matches bug-class discovery on the seeded corpus when the predicates are known.
+Failure condition: the claim weakens further if adaptive random testing, Hypothesis, or a real numerical bug corpus finds the same failures faster at equal budget, or if RDT-cover adds no classes beyond simpler boundary/power schedules.
 
 Allowed wording: RDT-cover is useful as a deterministic complement to random and low-discrepancy sampling when explicit properties are not yet available.
 
@@ -34,7 +34,7 @@ Forbidden wording: RDT-cover is generally better than property-based testing or 
 
 Claim: RDT residual sampling is a research candidate, not a supported general method.
 
-Evidence: tuned RDT wins on synthetic sharp-front and two-hotspot fields, but top residual wins on the oscillatory field and real California residuals.
+Evidence: tuned RDT wins on the two-hotspot field and remains competitive on sharp-front fields, but top residual, top residual gradient, or grid-stratified residual baselines win on California residuals, multi-front, and oscillatory fields.
 
 Failure condition: if RDT does not beat RAR/RAD or greedy residual methods on full PDE/PINN training error, it should remain research-only.
 
@@ -70,10 +70,20 @@ Forbidden wording: RDT is a general compressor.
 
 Claim: recursive-depth geometry validation reproduces selected known forms within declared tolerance.
 
-Evidence: local known-form validation reports mean max relative error `0.00036741` for the RDT schedule and `0.00040250` for the coarse midpoint baseline. Earlier benchmark-hub adapter evidence reported candidate `0.00036741236618786894` against baseline mean `0.004643523475071463`.
+Evidence: local known-form validation reports mean max relative error `0.00036741` for the RDT schedule and `0.00040250` for the coarse midpoint baseline. The added simple-integral checks narrow the claim: Sobol/QMC beats RDT on annulus, smooth, triangle, and interval examples, while coarse midpoint ties or wins on the unit-square product example.
 
 Failure condition: the claim weakens if equal-budget quadrature, Monte Carlo, or QMC dominates, or if convergence fails on additional known forms.
 
 Allowed wording: the geometry helper is a bounded numerical validation object.
 
 Forbidden wording: RDT proves a new geometry theory.
+
+## Spatial Index Boundary
+
+Claim status: companion-repo context only.
+
+Evidence: the separate [RDT Spatial Index](https://github.com/RRG314/rdt-spatial-index) repository contains the range-query and kNN-oriented implementation line. Earlier adapter evidence showed exactness for RDT index wrappers under controlled synthetic checks, but did not establish general speed superiority over mature spatial-index families.
+
+Allowed wording: RDT spatial indexing is a related implementation branch and should be evaluated in its own repository against KDTree, grid, R-tree/BVH, H3/S2/geohash, and workload-specific baselines.
+
+Forbidden wording: RDT Adaptive Hierarchies replaces standard spatial indexes.

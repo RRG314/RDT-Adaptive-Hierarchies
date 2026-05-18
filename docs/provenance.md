@@ -8,6 +8,17 @@ The Recursive Division Tree line of work began with Steven Reid's Zenodo preprin
 
 The repository should therefore be cited as a later computational framework derived from the RDT research line, not as a replacement for the integer-depth preprint.
 
+## Companion RDT Spatial Index Repository
+
+The companion repository [RDT Spatial Index](https://github.com/RRG314/rdt-spatial-index) contains the practical range-query and kNN-oriented spatial-index implementations, including `RDTIndex`, `RDTFastIndex`, optimized variants, tests, and publication-oriented benchmark artifacts.
+
+This package does not copy that repository's code. It cites it as the related spatial-index branch of the RDT research line. The distinction matters:
+
+- `rdt-spatial-index` focuses on spatial indexing, range queries, kNN-style access patterns, and backend performance.
+- `RDT-Adaptive-Hierarchies` focuses on stable partition resize, deterministic coverage, and bounded hierarchy diagnostics.
+
+The shared idea is recursive subdivision with depth/path metadata. The supported claims are different and should be evaluated with different benchmarks.
+
 ## Active Code
 
 | Current file | Source lineage | Status |
@@ -18,6 +29,13 @@ The repository should therefore be cited as a later computational framework deri
 | `src/rdt_adaptive_hierarchy/applications/cover.py` | deterministic coverage experiments promoted into package code | active |
 | `src/rdt_adaptive_hierarchy/applications/residual_sampler.py` | residual sampling experiments | research-only |
 | `src/rdt_adaptive_hierarchy/applications/geometry_validation.py` | recursive-depth geometry validation experiments | experimental |
+
+## Related Repositories
+
+| Repository | Role |
+|---|---|
+| <https://github.com/RRG314/rdt-spatial-index> | Companion spatial-index implementation and benchmarks |
+| <https://github.com/RRG314/Recursive-Division-Tree-Algorithm--Preprint> | Earlier RDT integer-depth/preprint repository |
 
 ## Result Artifacts
 

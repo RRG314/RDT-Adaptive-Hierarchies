@@ -14,7 +14,7 @@ A deterministic recursive hierarchy with stable ancestor-label inheritance can p
 
 Partitioned systems often need to change the number of buckets without moving most assigned points. Hash-based methods can reduce movement, but they typically ignore geometric locality. Spatial orderings and grids preserve locality, but they may move many points or produce load imbalance during resize. This work studies RDT Adaptive Hierarchies, a deterministic recursive hierarchy that carries depth, path, and stable-label metadata. The central mechanism is ancestor-label inheritance: when a cell splits, one child keeps the parent label and the new branch receives a new label.
 
-We evaluate the method on synthetic point sets and California Housing coordinates using a combined movement/locality/load score. In the current benchmark, stable RDT labels outperform Jump Hash, virtual-node consistent hashing, rendezvous hashing, Morton ordering, Hilbert ordering, H3, S2, geohash, grid partitioning, principal sorting, modulo hashing, and a remapped-label ablation on the tested resize tasks. We also introduce RDT-cover, a deterministic numerical coverage schedule that targets boundaries, midpoints, powers of ten, corners, and shell-like scale transitions. In a seeded numerical edge-case benchmark, full RDT-cover, RDT+Sobol, and Hypothesis-targeted coverage find all five predefined edge-case classes, while random, Sobol, and Latin hypercube find fewer.
+We evaluate the method on synthetic point sets and California Housing coordinates using a combined movement/locality/load score. In the current benchmark, stable RDT labels outperform Jump Hash, virtual-node consistent hashing, rendezvous hashing, Morton ordering, Hilbert ordering, H3, S2, geohash, grid partitioning, principal sorting, modulo hashing, null-label controls, and a remapped-label ablation on the tested resize tasks. We also introduce RDT-cover, a deterministic numerical coverage schedule that targets boundaries, midpoints, powers of ten, powers of two, corners, and shell-like scale transitions. In an expanded seeded numerical edge-case benchmark, full RDT-cover finds more classes than blind random, Sobol, Halton, and Latin hypercube sampling, but it is weaker than targeted Hypothesis and a powers-only ablation.
 
 The paper should make bounded claims only. RDT is not presented as a universal algorithm, a cryptographic primitive, a general compressor, or a replacement for mature spatial indexing systems. Residual sampling, shell drift, and recursive delta preprocessing are included only as limitations and research directions.
 
@@ -33,13 +33,13 @@ Allowed claims:
 
 - Stable labels improve the tested movement/locality/load tradeoff.
 - The ablation supports ancestor-label inheritance as the important mechanism.
-- RDT-cover improves discovery of the seeded numerical edge-case classes in the current benchmark.
+- RDT-cover improves discovery of seeded numerical edge-case classes over blind random, Sobol, Halton, and Latin hypercube sampling in the current benchmark.
 - Geometry validation is a bounded numerical check against known forms.
 
 Forbidden claims:
 
 - RDT is generally better than all consistent hashing or spatial indexing methods.
-- RDT-cover is generally better than Hypothesis, fuzzing, or adaptive random testing.
+- RDT-cover is generally better than Hypothesis, fuzzing, adaptive random testing, or simpler tuned edge schedules.
 - RDT is a universal entropy theory, cryptographic primitive, physics closure model, general compressor, or anomaly detector.
 
 ## Proposed Paper Structure
@@ -117,9 +117,10 @@ Current key result on California Housing:
 
 | Resize | RDT stable | Jump Hash | Morton sort |
 |---|---:|---:|---:|
-| 16 -> 20 | 0.4386 | 0.6583 | 0.9195 |
-| 32 -> 40 | 0.4945 | 0.6664 | 0.9674 |
-| 64 -> 80 | 0.4641 | 0.6790 | 0.9830 |
+| 16 -> 20 | 0.4686 | 0.6746 | 0.9208 |
+| 32 -> 40 | 0.4695 | 0.7174 | 0.9682 |
+| 64 -> 80 | 0.4706 | 0.7219 | 0.9889 |
+| 128 -> 160 | 0.4514 | 0.7544 | 0.9971 |
 
 ### 6. RDT-Cover
 
@@ -134,17 +135,21 @@ Define the coverage schedule:
 - shell-like jitter,
 - optional Sobol fill.
 
-Current key result:
+Current key result at budget `1024` on the expanded 14-class corpus:
 
 | Method | Mean edge-case classes found |
 |---|---:|
-| RDT full | 5.00 |
-| RDT+Sobol | 5.00 |
-| Powers-only | 4.00 |
-| Random uniform | 2.00 |
-| Sobol | 2.00 |
+| Hypothesis-targeted | 13.00 |
+| Powers-only | 11.00 |
+| RDT full | 10.00 |
+| Boundary-only | 9.00 |
+| RDT+Sobol | 9.00 |
+| Random uniform | 4.00 |
+| Sobol | 4.00 |
+| Halton | 4.00 |
+| Latin hypercube | 4.00 |
 
-The paper must say this is a seeded numerical corpus, not real bug-corpus evidence.
+The paper must say this is a seeded numerical corpus, not real bug-corpus evidence. It must also say that power/scale anchors explain much of the useful discovery behavior.
 
 ### 7. Ablations
 
@@ -165,7 +170,7 @@ Current failure/limitation cases:
 - Residual sampler loses to top residual on real California residuals.
 - Shell drift does not beat simple baselines consistently.
 - Recursive delta preprocessing is not a general compressor.
-- Raw RDT spatial index wrappers are not promoted because exactness did not become speed superiority.
+- Raw RDT spatial indexing is treated as a companion-repo line of work. The `rdt-spatial-index` repository should be cited for range-query and kNN-oriented indexing, while this paper keeps the main claim focused on stable resize partitioning.
 
 ### 9. Reproducibility Package
 
@@ -191,6 +196,6 @@ RDT is useful when hierarchy metadata lets the system preserve or target somethi
 - Virtual-node count, H3/S2/geohash resolution, and Hilbert bit-depth sensitivity.
 - Adaptive random testing comparisons for RDT-cover.
 - Real numerical bug or mutant corpus for coverage.
-- Runtime and memory scaling at larger `n`.
-- Confidence intervals in the polished result tables.
+- Runtime and memory scaling beyond the current `50,000` point local run.
+- Full memory resident-set-size profiling, not only Python allocation tracking.
 - A clearer theory section for when stable label inheritance should or should not help.

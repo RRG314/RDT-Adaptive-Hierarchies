@@ -14,6 +14,9 @@ import math
 from dataclasses import dataclass, asdict
 from typing import Dict, Iterable, List
 
+import numpy as np
+from scipy.stats import qmc
+
 
 def recursive_depth(n: int, alpha: float = 1.5) -> int:
     """Return the integer recursive depth used by the promoted geometry object."""
@@ -123,3 +126,71 @@ def run_geometry_validation(radii: Iterable[float] = (0.5, 1.0, 2.0)) -> List[Ge
         rows.append(evaluate_known_forms(radius, "rdt_recursive_depth", recursive_depth_geometry(radius)))
         rows.append(evaluate_known_forms(radius, "coarse_midpoint_baseline", coarse_baseline_geometry(radius)))
     return rows
+
+
+@dataclass(frozen=True)
+class IntegralValidationResult:
+    target: str
+    method: str
+    budget: int
+    estimate: float
+    exact: float
+    absolute_error: float
+    relative_error: float
+
+    def to_dict(self) -> Dict[str, object]:
+        return asdict(self)
+
+
+def run_integral_validation(budget: int = 4096, seed: int = 0) -> List[IntegralValidationResult]:
+    """Validate simple known integrals with deterministic and stochastic baselines."""
+
+    targets = {
+        "unit_interval_x2": (1, lambda x: x[:, 0] ** 2, 1.0 / 3.0),
+        "unit_square_xy": (2, lambda x: x[:, 0] * x[:, 1], 0.25),
+        "smooth_sin_cos": (2, lambda x: np.sin(np.pi * x[:, 0]) * np.cos((np.pi / 2.0) * x[:, 1]), 4.0 / (np.pi * np.pi)),
+        "triangle_indicator": (2, lambda x: (x[:, 0] + x[:, 1] <= 1.0).astype(float), 0.5),
+        "annulus_area_unit_square": (2, lambda x: (((x[:, 0] - 0.5) ** 2 + (x[:, 1] - 0.5) ** 2 >= 0.12**2) & ((x[:, 0] - 0.5) ** 2 + (x[:, 1] - 0.5) ** 2 <= 0.32**2)).astype(float), math.pi * (0.32**2 - 0.12**2)),
+    }
+    rows: List[IntegralValidationResult] = []
+    for target, (dim, func, exact) in targets.items():
+        for method, points in _integral_point_sets(dim, budget, seed).items():
+            estimate = float(np.mean(func(points)))
+            rows.append(IntegralValidationResult(
+                target=target,
+                method=method,
+                budget=budget,
+                estimate=estimate,
+                exact=float(exact),
+                absolute_error=abs(estimate - float(exact)),
+                relative_error=abs(estimate - float(exact)) / max(abs(float(exact)), 1e-12),
+            ))
+    return rows
+
+
+def _integral_point_sets(dim: int, budget: int, seed: int) -> Dict[str, np.ndarray]:
+    n_side = max(2, int(math.sqrt(budget)))
+    axes = [np.linspace(0.5 / n_side, 1.0 - 0.5 / n_side, n_side) for _ in range(dim)]
+    mesh = np.meshgrid(*axes, indexing="ij")
+    midpoint = np.column_stack([m.ravel() for m in mesh])[:budget]
+
+    rng = np.random.default_rng(seed)
+    monte_carlo = rng.random((budget, dim))
+
+    m = int(math.ceil(math.log2(budget)))
+    sobol = qmc.Sobol(d=dim, scramble=True, seed=seed).random_base2(m)[:budget]
+
+    depth = max(2, recursive_depth(budget))
+    rdt_n = min(max(2, 2**depth), n_side)
+    axes = [np.linspace(0.5 / rdt_n, 1.0 - 0.5 / rdt_n, rdt_n) for _ in range(dim)]
+    mesh = np.meshgrid(*axes, indexing="ij")
+    rdt_points = np.column_stack([m.ravel() for m in mesh])
+    if len(rdt_points) < budget:
+        fill = qmc.Sobol(d=dim, scramble=True, seed=seed + 99).random_base2(m)[: budget - len(rdt_points)]
+        rdt_points = np.vstack([rdt_points, fill])
+    return {
+        "rdt_recursive_depth_grid": rdt_points[:budget],
+        "coarse_midpoint_grid": midpoint,
+        "monte_carlo": monte_carlo,
+        "sobol_qmc": sobol,
+    }

@@ -1,0 +1,315 @@
+{
+  "benchmark": "known_form_geometry_validation",
+  "status": "experimental_application_supported_by_known_form_checks",
+  "rows": [
+    {
+      "radius": 0.5,
+      "method": "rdt_recursive_depth",
+      "max_relative_error": 0.00036741236618782373,
+      "mean_relative_error": 7.38254087658631e-05,
+      "relative_errors": {
+        "disk_area": 0.00036741236618782373,
+        "sphere_volume": 1.7146776414917466e-06,
+        "cone_volume": 0.0,
+        "cube_volume": 0.0,
+        "cylinder_volume": 0.0
+      }
+    },
+    {
+      "radius": 0.5,
+      "method": "coarse_midpoint_baseline",
+      "max_relative_error": 0.0004024994347707008,
+      "mean_relative_error": 0.00010827766473197275,
+      "relative_errors": {
+        "disk_area": 0.0004024994347707008,
+        "sphere_volume": 0.00013888888888916298,
+        "cone_volume": 0.0,
+        "cube_volume": 0.0,
+        "cylinder_volume": 0.0
+      }
+    },
+    {
+      "radius": 1.0,
+      "method": "rdt_recursive_depth",
+      "max_relative_error": 0.00036741236618782373,
+      "mean_relative_error": 7.38254087658631e-05,
+      "relative_errors": {
+        "disk_area": 0.00036741236618782373,
+        "sphere_volume": 1.7146776414917466e-06,
+        "cone_volume": 0.0,
+        "cube_volume": 0.0,
+        "cylinder_volume": 0.0
+      }
+    },
+    {
+      "radius": 1.0,
+      "method": "coarse_midpoint_baseline",
+      "max_relative_error": 0.0004024994347707008,
+      "mean_relative_error": 0.00010827766473197275,
+      "relative_errors": {
+        "disk_area": 0.0004024994347707008,
+        "sphere_volume": 0.00013888888888916298,
+        "cone_volume": 0.0,
+        "cube_volume": 0.0,
+        "cylinder_volume": 0.0
+      }
+    },
+    {
+      "radius": 2.0,
+      "method": "rdt_recursive_depth",
+      "max_relative_error": 0.00036741236618782373,
+      "mean_relative_error": 7.38254087658631e-05,
+      "relative_errors": {
+        "disk_area": 0.00036741236618782373,
+        "sphere_volume": 1.7146776414917466e-06,
+        "cone_volume": 0.0,
+        "cube_volume": 0.0,
+        "cylinder_volume": 0.0
+      }
+    },
+    {
+      "radius": 2.0,
+      "method": "coarse_midpoint_baseline",
+      "max_relative_error": 0.0004024994347707008,
+      "mean_relative_error": 0.00010827766473197275,
+      "relative_errors": {
+        "disk_area": 0.0004024994347707008,
+        "sphere_volume": 0.00013888888888916298,
+        "cone_volume": 0.0,
+        "cube_volume": 0.0,
+        "cylinder_volume": 0.0
+      }
+    }
+  ],
+  "integral_rows": [
+    {
+      "target": "unit_interval_x2",
+      "method": "rdt_recursive_depth_grid",
+      "budget": 4096,
+      "estimate": 0.3333327008149152,
+      "exact": 0.3333333333333333,
+      "absolute_error": 6.325184181421584e-07,
+      "relative_error": 1.897555254426475e-06
+    },
+    {
+      "target": "unit_interval_x2",
+      "method": "coarse_midpoint_grid",
+      "budget": 4096,
+      "estimate": 0.33331298828125,
+      "exact": 0.3333333333333333,
+      "absolute_error": 2.034505208331483e-05,
+      "relative_error": 6.103515624994449e-05
+    },
+    {
+      "target": "unit_interval_x2",
+      "method": "monte_carlo",
+      "budget": 4096,
+      "estimate": 0.32939060366503997,
+      "exact": 0.3333333333333333,
+      "absolute_error": 0.003942729668293343,
+      "relative_error": 0.01182818900488003
+    },
+    {
+      "target": "unit_interval_x2",
+      "method": "sobol_qmc",
+      "budget": 4096,
+      "estimate": 0.3333333328676721,
+      "exact": 0.3333333333333333,
+      "absolute_error": 4.6566123179658803e-10,
+      "relative_error": 1.396983695389764e-09
+    },
+    {
+      "target": "unit_square_xy",
+      "method": "rdt_recursive_depth_grid",
+      "budget": 4096,
+      "estimate": 0.24999999965075403,
+      "exact": 0.25,
+      "absolute_error": 3.4924596548080444e-10,
+      "relative_error": 1.3969838619232178e-09
+    },
+    {
+      "target": "unit_square_xy",
+      "method": "coarse_midpoint_grid",
+      "budget": 4096,
+      "estimate": 0.25,
+      "exact": 0.25,
+      "absolute_error": 0.0,
+      "relative_error": 0.0
+    },
+    {
+      "target": "unit_square_xy",
+      "method": "monte_carlo",
+      "budget": 4096,
+      "estimate": 0.2452295504136433,
+      "exact": 0.25,
+      "absolute_error": 0.004770449586356695,
+      "relative_error": 0.01908179834542678
+    },
+    {
+      "target": "unit_square_xy",
+      "method": "sobol_qmc",
+      "budget": 4096,
+      "estimate": 0.2499999995343387,
+      "exact": 0.25,
+      "absolute_error": 4.656612873077393e-10,
+      "relative_error": 1.862645149230957e-09
+    },
+    {
+      "target": "smooth_sin_cos",
+      "method": "rdt_recursive_depth_grid",
+      "budget": 4096,
+      "estimate": 0.4053356908667086,
+      "exact": 0.4052847345693511,
+      "absolute_error": 5.095629735751839e-05,
+      "relative_error": 0.0001257296241657454
+    },
+    {
+      "target": "smooth_sin_cos",
+      "method": "coarse_midpoint_grid",
+      "budget": 4096,
+      "estimate": 0.4053356012595388,
+      "exact": 0.4052847345693511,
+      "absolute_error": 5.086669018772305e-05,
+      "relative_error": 0.00012550852733640008
+    },
+    {
+      "target": "smooth_sin_cos",
+      "method": "monte_carlo",
+      "budget": 4096,
+      "estimate": 0.40288862403799697,
+      "exact": 0.4052847345693511,
+      "absolute_error": 0.002396110531354134,
+      "relative_error": 0.005912165761437331
+    },
+    {
+      "target": "smooth_sin_cos",
+      "method": "sobol_qmc",
+      "budget": 4096,
+      "estimate": 0.4052846269774055,
+      "exact": 0.4052847345693511,
+      "absolute_error": 1.0759194557508067e-07,
+      "relative_error": 2.654724848923957e-07
+    },
+    {
+      "target": "triangle_indicator",
+      "method": "rdt_recursive_depth_grid",
+      "budget": 4096,
+      "estimate": 0.506591796875,
+      "exact": 0.5,
+      "absolute_error": 0.006591796875,
+      "relative_error": 0.01318359375
+    },
+    {
+      "target": "triangle_indicator",
+      "method": "coarse_midpoint_grid",
+      "budget": 4096,
+      "estimate": 0.5078125,
+      "exact": 0.5,
+      "absolute_error": 0.0078125,
+      "relative_error": 0.015625
+    },
+    {
+      "target": "triangle_indicator",
+      "method": "monte_carlo",
+      "budget": 4096,
+      "estimate": 0.507568359375,
+      "exact": 0.5,
+      "absolute_error": 0.007568359375,
+      "relative_error": 0.01513671875
+    },
+    {
+      "target": "triangle_indicator",
+      "method": "sobol_qmc",
+      "budget": 4096,
+      "estimate": 0.5,
+      "exact": 0.5,
+      "absolute_error": 0.0,
+      "relative_error": 0.0
+    },
+    {
+      "target": "annulus_area_unit_square",
+      "method": "rdt_recursive_depth_grid",
+      "budget": 4096,
+      "estimate": 0.2744140625,
+      "exact": 0.2764601535159018,
+      "absolute_error": 0.0020460910159018075,
+      "relative_error": 0.007401034072652056
+    },
+    {
+      "target": "annulus_area_unit_square",
+      "method": "coarse_midpoint_grid",
+      "budget": 4096,
+      "estimate": 0.2724609375,
+      "exact": 0.2764601535159018,
+      "absolute_error": 0.0039992160159018075,
+      "relative_error": 0.014465795395978377
+    },
+    {
+      "target": "annulus_area_unit_square",
+      "method": "monte_carlo",
+      "budget": 4096,
+      "estimate": 0.267578125,
+      "exact": 0.2764601535159018,
+      "absolute_error": 0.008882028515901808,
+      "relative_error": 0.032127698704294175
+    },
+    {
+      "target": "annulus_area_unit_square",
+      "method": "sobol_qmc",
+      "budget": 4096,
+      "estimate": 0.27587890625,
+      "exact": 0.2764601535159018,
+      "absolute_error": 0.0005812472659018075,
+      "relative_error": 0.0021024630801573167
+    }
+  ],
+  "summary": {
+    "coarse_midpoint_baseline": {
+      "runs": 3,
+      "max_relative_error_mean": 0.0004024994347707008,
+      "mean_relative_error_mean": 0.00010827766473197275
+    },
+    "rdt_recursive_depth": {
+      "runs": 3,
+      "max_relative_error_mean": 0.00036741236618782373,
+      "mean_relative_error_mean": 7.38254087658631e-05
+    }
+  },
+  "integral_summary": {
+    "annulus_area_unit_square": {
+      "best_method": "sobol_qmc",
+      "best_relative_error": 0.0021024630801573167,
+      "rdt_relative_error": 0.007401034072652056,
+      "sobol_relative_error": 0.0021024630801573167,
+      "monte_carlo_relative_error": 0.032127698704294175
+    },
+    "smooth_sin_cos": {
+      "best_method": "sobol_qmc",
+      "best_relative_error": 2.654724848923957e-07,
+      "rdt_relative_error": 0.0001257296241657454,
+      "sobol_relative_error": 2.654724848923957e-07,
+      "monte_carlo_relative_error": 0.005912165761437331
+    },
+    "triangle_indicator": {
+      "best_method": "sobol_qmc",
+      "best_relative_error": 0.0,
+      "rdt_relative_error": 0.01318359375,
+      "sobol_relative_error": 0.0,
+      "monte_carlo_relative_error": 0.01513671875
+    },
+    "unit_interval_x2": {
+      "best_method": "sobol_qmc",
+      "best_relative_error": 1.396983695389764e-09,
+      "rdt_relative_error": 1.897555254426475e-06,
+      "sobol_relative_error": 1.396983695389764e-09,
+      "monte_carlo_relative_error": 0.01182818900488003
+    },
+    "unit_square_xy": {
+      "best_method": "coarse_midpoint_grid",
+      "best_relative_error": 0.0,
+      "rdt_relative_error": 1.3969838619232178e-09,
+      "sobol_relative_error": 1.862645149230957e-09,
+      "monte_carlo_relative_error": 0.01908179834542678
+    }
+  }
+}

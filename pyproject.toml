@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-test = ["pytest>=8.0"]
+test = ["pytest>=8.0", "hypothesis>=6.100"]
 data = ["scikit-learn>=1.5"]
 baselines = [
   "h3>=4.0",
@@ -36,6 +36,7 @@ dev = [
 
 [project.urls]
 Repository = "https://github.com/RRG314/RDT-Adaptive-Hierarchies"
+"RDT Spatial Index" = "https://github.com/RRG314/rdt-spatial-index"
 
 [build-system]
 requires = ["setuptools>=69", "wheel"]

@@ -13,6 +13,7 @@
 
 ## Spatial And Geospatial Baselines
 
+- Reid, S. *RDT Spatial Index*. GitHub repository. <https://github.com/RRG314/rdt-spatial-index>
 - H3 documentation. <https://h3geo.org/docs/>
 - S2 Cell hierarchy documentation. <https://s2geometry.io/devguide/s2cell_hierarchy>
 - scikit-learn KDTree documentation. <https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KDTree.html>

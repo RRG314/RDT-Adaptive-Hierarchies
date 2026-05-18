@@ -62,13 +62,15 @@ Stable partition baselines currently include:
 - grid partitioning,
 - remapped-label RDT ablation.
 
-Implemented release-hardening baselines:
+Implemented release-hardening and deep-validation baselines:
 
 - virtual-node consistent hashing,
 - Hilbert ordering,
 - H3,
 - S2,
-- geohash.
+- geohash,
+- shuffled-label null control with matched counts,
+- random-label null control.
 
 Missing before submission:
 
@@ -84,12 +86,14 @@ RDT-cover generates a deterministic set of numeric test cases from a bounded dom
 - domain center,
 - minimum and maximum boundaries,
 - zero when it lies inside the domain,
-- powers of ten and their negatives,
+- powers of ten, powers of two, and their negatives,
 - recursive midpoints,
 - corners,
 - shell-like jitter around the center.
 
-The hybrid method adds Sobol fill after deterministic edge anchors. The intended use is not to replace random or property-based testing. It is to ensure that known numerical stress regions appear under a finite budget.
+The benchmark also includes boundary-only, midpoint-only, powers-only, Sobol, Halton, Latin hypercube, random, hybrid RDT+Sobol, and Hypothesis-targeted baselines. The intended use is not to replace random or property-based testing. It is to ensure that known numerical stress regions appear under a finite budget when explicit properties are not yet formalized.
+
+The expanded 14-class corpus narrowed the RDT-cover claim. At budget `1024`, Hypothesis-targeted coverage found `13/14` classes, powers-only found `11/14`, and full RDT-cover found `10/14`. This means the paper should not imply that the full RDT schedule is the best edge-case schedule. The defensible point is that deterministic multiscale anchors beat blind random, Sobol, Halton, and Latin hypercube on this corpus.
 
 ## Residual Sampler Method
 
@@ -102,6 +106,8 @@ The residual sampler ranks candidate points using:
 
 It is intentionally marked research-only. The existing metric measures candidate selection quality, not downstream solver or training quality. A publishable PDE/PINN claim would need full training loops, convergence metrics, RAR/RAD baselines, and conservation/stability checks where relevant.
 
+The deep-validation run added `multi_front` and a real California Housing residual field. RDT variants won only selected synthetic cases. Greedy or stratified residual baselines won the real California, oscillatory, and multi-front cases. This belongs in the limitations section rather than the contribution list.
+
 ## Geometry Validation Method
 
 The geometry validation module evaluates selected known forms:
@@ -112,7 +118,7 @@ The geometry validation module evaluates selected known forms:
 - cube volume,
 - cylinder volume.
 
-The current result is a bounded numerical validation. It should be described as a schedule comparison against simple baselines, not as evidence for a new geometry theory.
+The deep-validation run also added simple integral checks for an interval polynomial, square product, smooth sine/cosine function, triangle indicator, and annulus indicator. Sobol/QMC beats RDT on several of those tasks. The current result is a bounded numerical validation. It should be described as a schedule comparison against simple baselines, not as evidence for a new geometry theory or a generally better integrator.
 
 ## Result Reporting Rules
 

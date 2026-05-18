@@ -11,6 +11,7 @@ def test_examples_execute_without_failure():
     for name in [
         "stable_partition_basic.py",
         "cover_basic.py",
+        "cover_hypothesis_basic.py",
         "geometry_validation_basic.py",
         "residual_sampler_research_demo.py",
     ]:

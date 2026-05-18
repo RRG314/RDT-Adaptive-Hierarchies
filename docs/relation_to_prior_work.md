@@ -22,6 +22,8 @@ H3 and S2 are mature geospatial indexing systems. H3 partitions the world into h
 
 KDTree, quadtree, octree, R-tree, and BVH methods all use spatial hierarchy. RDT-v1 is not currently promoted as a raw range-query or nearest-neighbor index. Prior RDT spatial index wrappers matched exactness but did not establish speed gains.
 
+The practical spatial-index branch of this research line lives in the companion repository [RDT Spatial Index](https://github.com/RRG314/rdt-spatial-index). That repository is the right place to evaluate `RDTIndex`, `RDTFastIndex`, optimized backends, range-query behavior, and kNN-oriented workloads. This repository cites it for provenance and comparison context, but keeps its own public claim focused on stable resize partitioning rather than replacing KDTree, grid, R-tree, H3, S2, or other mature spatial-index systems.
+
 ## Adaptive Mesh Refinement
 
 Adaptive mesh refinement refines numerical grids where more resolution is needed. RDT residual sampling is related in spirit but does not yet have full PDE/PINN training evidence. It remains research-only.
@@ -32,7 +34,7 @@ Sobol and Halton sequences are low-discrepancy sampling methods used in quasi-Mo
 
 ## Property-Based Testing And Adaptive Random Testing
 
-Hypothesis and similar tools generate test cases from user-defined strategies. Adaptive random testing tries to spread test cases to improve failure discovery. The current release includes a Hypothesis-targeted coverage baseline that also finds all seeded classes when the predicates are known. Current evidence is still limited to a seeded numerical corpus.
+Hypothesis and similar tools generate test cases from user-defined strategies. Adaptive random testing tries to spread test cases to improve failure discovery. The current release includes a Hypothesis-targeted coverage baseline that outperforms RDT-cover on the expanded seeded corpus when predicates are known. Current evidence is still limited to synthetic seeded numerical classes.
 
 ## Residual Adaptive Refinement
 

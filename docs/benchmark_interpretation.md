@@ -10,15 +10,16 @@ Can stable ancestor-label inheritance reduce movement while preserving locality 
 
 Current answer:
 
-Yes, on the tested synthetic and California Housing resize tasks.
+Yes, on the tested synthetic and California Housing resize tasks. The deep-validation run covered eight datasets, five resize pairs, and three seeds. RDT stable labels were the best combined score in `40/40` dataset/resize tasks.
 
 The key real-data table is:
 
 | Resize | RDT stable | Jump Hash | Rendezvous Hash | Morton sort | Principal sort |
 |---|---:|---:|---:|---:|---:|
-| 16 -> 20 | 0.4386 | 0.6583 | 0.6585 | 0.9195 | 0.8942 |
-| 32 -> 40 | 0.4945 | 0.6664 | 0.6710 | 0.9674 | 0.9529 |
-| 64 -> 80 | 0.4641 | 0.6790 | 0.6819 | 0.9830 | 0.9630 |
+| 16 -> 20 | 0.4686 | 0.6746 | 0.6759 | 0.9208 | 0.8939 |
+| 32 -> 40 | 0.4695 | 0.7174 | 0.6812 | 0.9682 | 0.9531 |
+| 64 -> 80 | 0.4706 | 0.7219 | 0.7763 | 0.9889 | 0.9846 |
+| 128 -> 160 | 0.4514 | 0.7544 | 0.7546 | 0.9971 | 0.9991 |
 
 Why the result matters:
 
@@ -28,9 +29,9 @@ Why this is not a speed claim:
 
 Grid and Morton methods are faster in raw timing checks. The present claim is about a score that includes movement, locality, and load, not throughput dominance.
 
-Release-hardening update:
+Deep-validation update:
 
-Hilbert, H3, S2, geohash, and virtual-node consistent hashing are now implemented. On the 5-seed synthetic release-hardening run, RDT stable labels remained best on the tested uniform, clustered, and diagonal datasets. Peak Python benchmark memory was about `26,957 KiB`. This improves baseline coverage, but it does not replace larger real workload tests.
+Hilbert, H3, S2, geohash, and virtual-node consistent hashing are implemented. The deep-validation run also added hotspot-tail, anisotropic Gaussian, ring/annulus, two-cluster imbalance, California Housing, shuffled-label null controls, random-label null controls, score-weight sensitivity columns, build time, assignment time, and `tracemalloc` peak-memory fields. This improves baseline and artifact-control coverage, but it does not replace larger production workloads or resident-set-size profiling.
 
 What would weaken the claim:
 
@@ -50,10 +51,10 @@ The inheritance rule matters. Remapped labels lose badly:
 
 | Dataset | Resize | Stable labels | Remapped labels | Jump Hash |
 |---|---:|---:|---:|---:|
-| California Housing | 16 -> 20 | 0.4386 | 1.2198 | 0.6583 |
-| California Housing | 64 -> 80 | 0.4641 | 1.2762 | 0.6790 |
-| Synthetic uniform | 16 -> 20 | 0.2003 | 0.8439 | 0.6599 |
-| Synthetic clustered | 16 -> 20 | 0.2639 | 0.9513 | 0.6601 |
+| California Housing | 16 -> 20 | 0.4686 | 1.2806 | 0.6746 |
+| California Housing | 64 -> 80 | 0.4706 | 1.2612 | 0.7219 |
+| Synthetic uniform | 16 -> 20 | 0.2005 | 0.9190 | 0.6744 |
+| Synthetic clustered | 16 -> 20 | 0.2511 | 0.9173 | 0.6746 |
 
 Interpretation:
 
@@ -67,28 +68,34 @@ Can deterministic RDT coverage find seeded numerical edge-case classes missed by
 
 Current answer:
 
-Yes, in the current seeded benchmark.
+Yes, compared with blind random, Sobol, Halton, and Latin hypercube. No, compared with targeted Hypothesis or even the simpler powers-only ablation on the expanded corpus.
+
+At budget `1024` on the 14-class corpus:
 
 | Method | Mean bug classes found | Mean total hits |
 |---|---:|---:|
-| Hypothesis-targeted | 5.00 | 294.60 |
-| RDT full | 5.00 | 68.40 |
-| RDT+Sobol | 5.00 | 63.40 |
-| Random uniform | 2.00 | 25.20 |
-| Sobol | 2.00 | 23.20 |
-| Latin hypercube | 1.40 | 21.80 |
+| Hypothesis-targeted | 13.00 | 1294.33 |
+| Powers-only | 11.00 | 661.33 |
+| RDT full | 10.00 | 199.67 |
+| Boundary-only | 9.00 | 306.67 |
+| RDT+Sobol | 9.00 | 256.33 |
+| Midpoint-only | 6.00 | 1669.67 |
+| Random uniform | 4.00 | 278.33 |
+| Sobol | 4.00 | 268.67 |
+| Halton | 4.00 | 270.67 |
+| Latin hypercube | 4.00 | 272.33 |
 
 Why the result matters:
 
-The component ablation shows that powers, midpoints, and boundaries each explain part of the win. The full schedule is not just a random cloud with a new name.
+The result still shows that deterministic edge anchors matter: all structured schedules beat blind random and low-discrepancy sampling on class discovery. It also shows that the full RDT schedule is not automatically the best schedule. Power/scale anchors carry much of the class-discovery signal in this synthetic corpus.
 
 What changed after Hypothesis integration:
 
-The Hypothesis-targeted baseline also finds all five seeded edge classes. It uses predicate-aware strategies, so it is a much stronger baseline than random, Sobol, or Latin hypercube. RDT-cover should now be described as a deterministic edge schedule that is competitive on the seeded corpus and useful when properties are not yet formalized, not as a replacement for property-based testing.
+The Hypothesis-targeted baseline finds the most classes because it uses predicate-aware strategies. RDT-cover should be described as a deterministic edge schedule that can improve blind coverage and produce reproducible test sets when properties are not yet formalized, not as a replacement for property-based testing.
 
 What this does not support:
 
-It does not show that RDT-cover beats Hypothesis, fuzzing, or adaptive random testing on real bugs. The next step is a real numerical bug or mutant corpus with time-to-first-failure reporting.
+It does not show that RDT-cover beats Hypothesis, fuzzing, adaptive random testing, or simpler hand-designed edge schedules on real bugs. The next step is a real numerical bug or mutant corpus with time-to-first-failure reporting.
 
 ## Geometry Validation
 
@@ -98,16 +105,26 @@ Can the recursive-depth schedule reproduce selected known forms with low error?
 
 Current answer:
 
-Yes, for the included disk, sphere, cone, cube, and cylinder checks.
+Yes, for the included disk, sphere, cone, cube, and cylinder checks. The expanded simple-integral checks show a narrower boundary: Sobol/QMC beats RDT on several ordinary integration tasks.
 
 | Method | Max relative error | Mean relative error |
 |---|---:|---:|
 | RDT recursive-depth | 0.0003674 | 0.0000738 |
 | Coarse midpoint baseline | 0.0004025 | 0.0001083 |
 
+Simple integral checks:
+
+| Target | Best method | RDT relative error | Sobol relative error |
+|---|---|---:|---:|
+| Annulus area | Sobol/QMC | 0.007401 | 0.002102 |
+| Smooth sine/cosine | Sobol/QMC | 0.000126 | 0.000000 |
+| Triangle indicator | Sobol/QMC | 0.013184 | 0.000000 |
+| Unit interval `x^2` | Sobol/QMC | 0.000002 | 0.000000 |
+| Unit square `xy` | Coarse midpoint grid | 0.000000 | 0.000000 |
+
 Interpretation:
 
-This is a useful bounded validation result. It does not prove a new geometry theory. It needs equal-budget quadrature, Monte Carlo, and quasi-Monte Carlo baselines.
+This is a useful bounded validation result. It does not prove a new geometry theory, and it does not beat QMC on standard integration tasks.
 
 ## Residual Sampler
 
@@ -121,10 +138,11 @@ Mixed.
 
 | Field | Winner | RDT tuned | Top residual |
 |---|---|---:|---:|
-| Sharp front | RDT tuned | 0.7241 | 0.6993 |
-| Two hotspots | RDT tuned | 0.7762 | 0.6381 |
-| Oscillatory | Top residual | 0.6280 | 0.8896 |
-| California residual | Top residual | 0.2839 | 0.4596 |
+| Sharp front | RDT no gradient | 0.7426 | 0.7314 |
+| Two hotspots | RDT tuned | 0.8563 | 0.6588 |
+| Multi-front | Top residual gradient | 0.6855 | 0.7583 |
+| Oscillatory | Grid-stratified residual | 0.6196 | 0.8910 |
+| California residual | Top residual | 0.4463 | 0.6869 |
 
 Interpretation:
 

@@ -1,0 +1,7 @@
+radius,method,max_relative_error,mean_relative_error,relative_errors
+0.5,rdt_recursive_depth,0.00036741236618782373,7.38254087658631e-05,"{""cone_volume"": 0.0, ""cube_volume"": 0.0, ""cylinder_volume"": 0.0, ""disk_area"": 0.00036741236618782373, ""sphere_volume"": 1.7146776414917466e-06}"
+0.5,coarse_midpoint_baseline,0.0004024994347707008,0.00010827766473197275,"{""cone_volume"": 0.0, ""cube_volume"": 0.0, ""cylinder_volume"": 0.0, ""disk_area"": 0.0004024994347707008, ""sphere_volume"": 0.00013888888888916298}"
+1.0,rdt_recursive_depth,0.00036741236618782373,7.38254087658631e-05,"{""cone_volume"": 0.0, ""cube_volume"": 0.0, ""cylinder_volume"": 0.0, ""disk_area"": 0.00036741236618782373, ""sphere_volume"": 1.7146776414917466e-06}"
+1.0,coarse_midpoint_baseline,0.0004024994347707008,0.00010827766473197275,"{""cone_volume"": 0.0, ""cube_volume"": 0.0, ""cylinder_volume"": 0.0, ""disk_area"": 0.0004024994347707008, ""sphere_volume"": 0.00013888888888916298}"
+2.0,rdt_recursive_depth,0.00036741236618782373,7.38254087658631e-05,"{""cone_volume"": 0.0, ""cube_volume"": 0.0, ""cylinder_volume"": 0.0, ""disk_area"": 0.00036741236618782373, ""sphere_volume"": 1.7146776414917466e-06}"
+2.0,coarse_midpoint_baseline,0.0004024994347707008,0.00010827766473197275,"{""cone_volume"": 0.0, ""cube_volume"": 0.0, ""cylinder_volume"": 0.0, ""disk_area"": 0.0004024994347707008, ""sphere_volume"": 0.00013888888888916298}"

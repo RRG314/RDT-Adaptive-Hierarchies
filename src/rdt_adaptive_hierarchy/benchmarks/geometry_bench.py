@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from statistics import mean
 
-from ..applications.geometry_validation import run_geometry_validation
+from ..applications.geometry_validation import run_geometry_validation, run_integral_validation
 
 
 def run_geometry_benchmark(output: Path) -> dict:
@@ -14,14 +14,18 @@ def run_geometry_benchmark(output: Path) -> dict:
 
     output.mkdir(parents=True, exist_ok=True)
     rows = [row.to_dict() for row in run_geometry_validation()]
+    integral_rows = [row.to_dict() for row in run_integral_validation()]
     aggregate = {
         "benchmark": "known_form_geometry_validation",
         "status": "experimental_application_supported_by_known_form_checks",
         "rows": rows,
+        "integral_rows": integral_rows,
         "summary": _summary(rows),
+        "integral_summary": _integral_summary(integral_rows),
     }
     (output / "geometry_results.json").write_text(json.dumps(aggregate, indent=2), encoding="utf-8")
     _write_csv(output / "geometry_summary.csv", rows)
+    _write_integral_csv(output / "geometry_integral_summary.csv", integral_rows)
     (output / "GEOMETRY_RESULT_CARD.md").write_text(_render_markdown(aggregate), encoding="utf-8")
     return aggregate
 
@@ -38,6 +42,21 @@ def _summary(rows: list[dict]) -> dict:
     return out
 
 
+def _integral_summary(rows: list[dict]) -> dict:
+    out = {}
+    for target in sorted({row["target"] for row in rows}):
+        group = [row for row in rows if row["target"] == target]
+        best = min(group, key=lambda row: row["relative_error"])
+        out[target] = {
+            "best_method": best["method"],
+            "best_relative_error": float(best["relative_error"]),
+            "rdt_relative_error": float(next(row["relative_error"] for row in group if row["method"] == "rdt_recursive_depth_grid")),
+            "sobol_relative_error": float(next(row["relative_error"] for row in group if row["method"] == "sobol_qmc")),
+            "monte_carlo_relative_error": float(next(row["relative_error"] for row in group if row["method"] == "monte_carlo")),
+        }
+    return out
+
+
 def _write_csv(path: Path, rows: list[dict]) -> None:
     fields = ["radius", "method", "max_relative_error", "mean_relative_error", "relative_errors"]
     with path.open("w", encoding="utf-8", newline="") as f:
@@ -47,6 +66,14 @@ def _write_csv(path: Path, rows: list[dict]) -> None:
             copied = dict(row)
             copied["relative_errors"] = json.dumps(copied["relative_errors"], sort_keys=True)
             writer.writerow(copied)
+
+
+def _write_integral_csv(path: Path, rows: list[dict]) -> None:
+    fields = ["target", "method", "budget", "estimate", "exact", "absolute_error", "relative_error"]
+    with path.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fields)
+        writer.writeheader()
+        writer.writerows(rows)
 
 
 def _render_markdown(result: dict) -> str:
@@ -61,6 +88,18 @@ def _render_markdown(result: dict) -> str:
     for method, row in result["summary"].items():
         lines.append(
             f"| `{method}` | {row['runs']} | {row['max_relative_error_mean']:.8f} | {row['mean_relative_error_mean']:.8f} |"
+        )
+    lines.extend([
+        "",
+        "## Simple integral checks",
+        "",
+        "| Target | Best method | RDT relative error | Sobol relative error | Monte Carlo relative error |",
+        "|---|---|---:|---:|---:|",
+    ])
+    for target, row in result["integral_summary"].items():
+        lines.append(
+            f"| {target} | `{row['best_method']}` | {row['rdt_relative_error']:.6f} | "
+            f"{row['sobol_relative_error']:.6f} | {row['monte_carlo_relative_error']:.6f} |"
         )
     lines.extend([
         "",

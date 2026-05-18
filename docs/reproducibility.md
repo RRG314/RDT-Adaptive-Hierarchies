@@ -23,6 +23,11 @@ The last benchmark run used:
 - SciPy `1.17.1`
 - scikit-learn `1.8.0`
 - pytest `9.0.3`
+- Hypothesis `6.152.7`
+- h3 `4.4.2`
+- s2sphere `0.2.5`
+- pygeohash `3.2.2`
+- psutil `7.2.2`
 
 ## Unit Tests
 
@@ -39,13 +44,14 @@ PYTHONPATH=src python examples/stable_partition_basic.py
 PYTHONPATH=src python examples/cover_basic.py
 PYTHONPATH=src python examples/geometry_validation_basic.py
 PYTHONPATH=src python examples/residual_sampler_research_demo.py
+PYTHONPATH=src python examples/cover_hypothesis_basic.py
 ```
 
 ## Benchmark Smoke Runs
 
 ```bash
 PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.stable_partition_bench --output-dir results/tmp/stable_partition --seeds 2 --n 2000
-PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.cover_bench --output-dir results/tmp/cover --seeds 2 --budget 256
+PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.cover_bench --output-dir results/tmp/cover --seeds 2 --budgets 256
 PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.residual_sampler_bench --output-dir results/tmp/residual_sampler --seeds 2 --n-side 48
 PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.geometry_bench --output-dir results/tmp/geometry
 ```
@@ -58,10 +64,28 @@ The latest release-hardening artifacts were generated with:
 
 ```bash
 PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.stable_partition_bench --seeds 5 --n 5000 --output-dir results/raw/release_hardening_2026-05-18/stable_partition
-PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.cover_bench --seeds 5 --budget 512 --output-dir results/raw/release_hardening_2026-05-18/cover
+PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.cover_bench --seeds 5 --budgets 512 --output-dir results/raw/release_hardening_2026-05-18/cover
 ```
 
 These runs report 95% confidence intervals and Python `tracemalloc` peak memory. The memory value is process-level Python allocation tracking, not full resident-set-size profiling.
+
+## Deep-Validation Snapshot
+
+The latest deep-validation artifacts were generated on 2026-05-18 with these commands:
+
+```bash
+PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.stable_partition_bench --seeds 3 --n 3000 --datasets uniform,clustered,diagonal,hotspot_tail,anisotropic_gaussian,ring_annulus,two_clusters_imbalance,california_housing --resize-pairs 8:10,16:20,32:40,64:80,128:160 --output-dir results/raw/deep_validation_2026-05-18/stable_partition
+
+PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.cover_bench --seeds 3 --budgets 128,256,512,1024 --output-dir results/raw/deep_validation_2026-05-18/cover
+
+PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.residual_sampler_bench --seeds 3 --n-side 56 --output-dir results/raw/deep_validation_2026-05-18/residual_sampler
+
+PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.geometry_bench --output-dir results/raw/deep_validation_2026-05-18/geometry
+
+PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.performance_scaling --stable-sizes 1000,5000,20000,50000 --cover-budgets 128,256,512,1024,2048 --output-dir results/raw/deep_validation_2026-05-18/performance_scaling
+```
+
+Those runs are interpreted in `results/README.md` and `results/summary_tables/`. They narrow several claims: RDT stable partitioning is stronger after the expanded run, RDT-cover is weaker against Hypothesis and powers-only controls, residual sampling remains research-only, and geometry validation is bounded rather than generally superior to QMC.
 
 ## Datasets
 
@@ -82,7 +106,7 @@ Raw benchmark artifacts live in `results/raw/`. They include JSON, CSV, and Mark
 
 ## Seeds
 
-The main stored run uses seeds `0..4` where repeated trials were used. The public smoke commands default to smaller runs so a reviewer can verify the code quickly.
+The release-hardening run uses seeds `0..4` where repeated trials were used. The deep-validation run uses seeds `0..2` for the larger matrix of datasets, resize pairs, and coverage budgets. The public smoke commands default to smaller runs so a reviewer can verify the code quickly.
 
 ## Verification Checklist
 

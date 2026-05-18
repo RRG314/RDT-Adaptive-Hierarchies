@@ -40,7 +40,7 @@ Purpose: show RDT-cover as the second supported application.
 
 Caption draft:
 
-Mean seeded numerical edge-case classes found at fixed budget. Full RDT, hybrid RDT, and Hypothesis-targeted coverage found all five classes, while random, Sobol, and Latin hypercube found fewer. The benchmark is synthetic and should be followed by real bug-corpus tests.
+Mean seeded numerical edge-case classes found at budget `1024` on the expanded 14-class corpus. Hypothesis-targeted coverage found `13/14` classes, powers-only found `11/14`, full RDT-cover found `10/14`, and blind random/Sobol/Halton/Latin hypercube found `4/14`. The benchmark is synthetic and should be followed by real bug-corpus tests. The figure narrows the RDT-cover claim rather than strengthening it.
 
 ## Figure 5: Residual Sampler Failure Case
 

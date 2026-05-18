@@ -110,6 +110,17 @@ def sobol_cover(bounds: List[Tuple[float, float]], budget: int, seed: int = 0) -
     return lows + sample * (highs - lows)
 
 
+def halton_cover(bounds: List[Tuple[float, float]], budget: int, seed: int = 0) -> np.ndarray:
+    """Generate a scrambled Halton sequence over the numeric bounds."""
+
+    dim = len(bounds)
+    sampler = qmc.Halton(d=dim, scramble=True, seed=seed)
+    sample = sampler.random(budget)
+    lows = np.array([a for a, _ in bounds], dtype=float)
+    highs = np.array([b for _, b in bounds], dtype=float)
+    return lows + sample * (highs - lows)
+
+
 def latin_hypercube_cover(bounds: List[Tuple[float, float]], budget: int, seed: int = 0) -> np.ndarray:
     dim = len(bounds)
     sampler = qmc.LatinHypercube(d=dim, seed=seed)
@@ -117,6 +128,56 @@ def latin_hypercube_cover(bounds: List[Tuple[float, float]], budget: int, seed: 
     lows = np.array([a for a, _ in bounds], dtype=float)
     highs = np.array([b for _, b in bounds], dtype=float)
     return lows + sample * (highs - lows)
+
+
+def boundary_only_cover(bounds: List[Tuple[float, float]], budget: int, seed: int = 0) -> np.ndarray:
+    """Ablation baseline using boundaries, corners, and deterministic fill."""
+
+    dim = len(bounds)
+    center = np.array([(a + b) / 2 for a, b in bounds], dtype=float)
+    candidates: list[np.ndarray] = [center]
+    for d, (low, high) in enumerate(bounds):
+        for value in (low, high):
+            p = center.copy()
+            p[d] = value
+            candidates.append(p)
+    for mask in range(min(2**dim, 256)):
+        p = center.copy()
+        for d, (low, high) in enumerate(bounds):
+            p[d] = high if (mask >> d) & 1 else low
+        candidates.append(p)
+    return _dedupe_and_fill(candidates, bounds, budget, seed)
+
+
+def midpoint_only_cover(bounds: List[Tuple[float, float]], budget: int, seed: int = 0) -> np.ndarray:
+    """Ablation baseline using recursive midpoints but no shell jitter."""
+
+    center = np.array([(a + b) / 2 for a, b in bounds], dtype=float)
+    candidates: list[np.ndarray] = [center]
+    depth = max(2, int(np.ceil(np.log2(max(2, budget // max(1, len(bounds)))))))
+    for d, (low, high) in enumerate(bounds):
+        for value in _recursive_midpoints(low, high, depth=depth):
+            p = center.copy()
+            p[d] = value
+            candidates.append(p)
+    return _dedupe_and_fill(candidates, bounds, budget, seed)
+
+
+def powers_only_cover(bounds: List[Tuple[float, float]], budget: int, seed: int = 0) -> np.ndarray:
+    """Ablation baseline using powers of ten and two plus zero where valid."""
+
+    center = np.array([(a + b) / 2 for a, b in bounds], dtype=float)
+    candidates: list[np.ndarray] = [center]
+    for d, (low, high) in enumerate(bounds):
+        anchors = [0.0] if low <= 0 <= high else []
+        for e in range(-12, 13):
+            anchors.extend([10.0**e, -(10.0**e), 2.0**e, -(2.0**e)])
+        for value in sorted(set(anchors)):
+            if low <= value <= high:
+                p = center.copy()
+                p[d] = value
+                candidates.append(p)
+    return _dedupe_and_fill(candidates, bounds, budget, seed)
 
 
 def hypothesis_cover(bounds: List[Tuple[float, float]], budget: int, seed: int = 0) -> np.ndarray:
@@ -148,9 +209,13 @@ def hypothesis_cover(bounds: List[Tuple[float, float]], budget: int, seed: int =
         if low <= 0 <= high:
             anchors.append(0.0)
         max_abs = max(abs(low), abs(high), 1e-12)
-        for e in range(int(np.floor(np.log10(max_abs))) - 3, int(np.ceil(np.log10(max_abs))) + 1):
+        for e in range(-12, int(np.ceil(np.log10(max_abs))) + 1):
             for sign in (-1.0, 1.0):
                 val = sign * (10.0 ** e)
+                if low <= val <= high:
+                    anchors.append(val)
+            for sign in (-1.0, 1.0):
+                val = sign * (2.0 ** e)
                 if low <= val <= high:
                     anchors.append(val)
         anchors_by_dim.append(sorted(set(float(v) for v in anchors)))
@@ -257,6 +322,20 @@ def _hypothesis_style_fill(
     return candidates
 
 
+def _dedupe_and_fill(
+    candidates: list[np.ndarray],
+    bounds: List[Tuple[float, float]],
+    budget: int,
+    seed: int,
+) -> np.ndarray:
+    rng = np.random.default_rng(seed)
+    arr = np.unique(np.round(np.vstack(candidates), decimals=14), axis=0) if candidates else np.empty((0, len(bounds)))
+    if len(arr) >= budget:
+        return arr[:budget]
+    extra = rng.uniform([a for a, _ in bounds], [b for _, b in bounds], size=(budget - len(arr), len(bounds)))
+    return np.vstack([arr, extra])
+
+
 def seeded_numeric_bug_predicates(points: np.ndarray) -> Dict[str, np.ndarray]:
     x = np.asarray(points, dtype=float)
     first = x[:, 0]
@@ -264,13 +343,30 @@ def seeded_numeric_bug_predicates(points: np.ndarray) -> Dict[str, np.ndarray]:
     radius = np.linalg.norm(x, axis=1)
     with np.errstate(divide="ignore", invalid="ignore"):
         log_abs = np.log10(np.maximum(np.abs(first), 1e-300))
-    near_power = np.min(np.abs(log_abs[:, None] - np.arange(-9, 10)[None, :]), axis=1) < 0.015
+    near_power_ten = np.min(np.abs(log_abs[:, None] - np.arange(-12, 13)[None, :]), axis=1) < 0.015
+    with np.errstate(divide="ignore", invalid="ignore"):
+        log2_abs = np.log2(np.maximum(np.abs(first), 1e-300))
+    near_power_two = np.min(np.abs(log2_abs[:, None] - np.arange(-40, 41)[None, :]), axis=1) < 0.02
+    smallest = np.minimum(np.abs(first), np.abs(second))
+    largest = np.maximum(np.abs(first), np.abs(second))
+    condition_ratio = np.divide(largest, smallest, out=np.zeros_like(largest), where=smallest > 0)
     return {
         "zero_boundary": np.abs(first) < 1e-9,
+        "near_zero_division": (np.abs(second) > 0) & (np.abs(second) < 1e-6),
+        "overflow_adjacent": np.any(np.abs(x) > 9e5, axis=1),
+        "underflow_adjacent": (np.abs(first) > 0) & (np.abs(first) < 1e-9),
         "large_cancellation": (np.abs(first + second) < 1e-6) & (np.maximum(np.abs(first), np.abs(second)) > 1e3),
-        "power_transition": near_power,
+        "power_of_ten_transition": near_power_ten,
+        "power_of_two_transition": near_power_two,
+        "sqrt_boundary": (first >= 0) & (first < 1e-6),
+        "log_domain_boundary": (first > 0) & (first < 1e-6),
+        "trigonometric_periodic_boundary": np.min(
+            np.abs((first[:, None] / (np.pi / 2.0)) - np.arange(-8, 9)[None, :]), axis=1
+        ) < 0.015,
         "outer_corner": np.all(np.abs(x) > 0.95 * np.max(np.abs(x), axis=0), axis=1),
         "thin_annulus": np.abs(radius - 1.0) < 0.015,
+        "near_singular_symmetric_2x2": (np.abs(first - second) < 1e-6) & (largest > 1.0),
+        "ill_conditioned_vector": condition_ratio > 1e9,
     }
 
 
@@ -280,6 +376,8 @@ class CoverBenchmarkResult:
     budget: int
     discovered_bug_classes: int
     total_hits: int
+    first_hit_index: int
+    hit_rate: float
     min_pairwise_distance: float
     centered_discrepancy: float
     runtime_seconds: float
@@ -289,8 +387,12 @@ def benchmark_cover_methods(bounds: List[Tuple[float, float]], budget: int = 512
     methods: Dict[str, Callable[[List[Tuple[float, float]], int, int], np.ndarray]] = {
         "rdt_cover": lambda b, n, s: rdt_cover(b, n, seed=s),
         "rdt_hybrid_cover": rdt_hybrid_cover,
+        "boundary_only": boundary_only_cover,
+        "midpoint_only": midpoint_only_cover,
+        "powers_only": powers_only_cover,
         "random_uniform": random_uniform_cover,
         "sobol": sobol_cover,
+        "halton": halton_cover,
         "latin_hypercube": latin_hypercube_cover,
     }
     try:
@@ -307,6 +409,11 @@ def benchmark_cover_methods(bounds: List[Tuple[float, float]], budget: int = 512
         bugs = seeded_numeric_bug_predicates(pts)
         discovered = sum(bool(np.any(mask)) for mask in bugs.values())
         hits = int(sum(np.sum(mask) for mask in bugs.values()))
+        any_hit = np.zeros(len(pts), dtype=bool)
+        for mask in bugs.values():
+            any_hit |= mask
+        first_hit_index = int(np.argmax(any_hit) + 1) if bool(np.any(any_hit)) else -1
+        hit_rate = float(hits / max(1, len(pts) * len(bugs)))
         sample = pts[: min(len(pts), 1000)]
         if len(sample) > 1:
             diffs = sample[:, None, :] - sample[None, :, :]
@@ -317,7 +424,7 @@ def benchmark_cover_methods(bounds: List[Tuple[float, float]], budget: int = 512
             min_dist = 0.0
         norm = _normalize_to_unit(pts, bounds)
         discrepancy = float(qmc.discrepancy(norm, method="CD")) if len(norm) else float("nan")
-        results[name] = CoverBenchmarkResult(name, budget, discovered, hits, min_dist, discrepancy, elapsed)
+        results[name] = CoverBenchmarkResult(name, budget, discovered, hits, first_hit_index, hit_rate, min_dist, discrepancy, elapsed)
     return results
 
 
