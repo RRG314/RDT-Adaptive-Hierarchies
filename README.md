@@ -15,7 +15,7 @@ The two main applications in this repo are:
 
 The repo also includes bounded experimental modules for recursive-depth geometry validation, residual sampling, and shell diagnostics. Those modules are documented as limited research tools, not headline claims.
 
-![Stable label inheritance mechanism](docs/figures/rdt_stable_label_mechanism.svg)
+![Stable label inheritance mechanism](https://raw.githubusercontent.com/RRG314/RDT-Adaptive-Hierarchies/main/docs/figures/rdt_stable_label_mechanism.svg)
 
 ## Origin
 
@@ -75,11 +75,11 @@ On California Housing coordinates in the 10-seed submission-validation run:
 | 64 -> 80 | 0.4728 | 0.7218 | 0.7757 | 0.7413 | 0.9892 | 0.9916 | 0.9887 |
 | 128 -> 160 | 0.4464 | 0.7540 | 0.7540 | 0.8048 | 0.9989 | 0.9988 | 0.9973 |
 
-![California Housing resize score](docs/figures/stable_partition_real.svg)
+![California Housing resize score](https://raw.githubusercontent.com/RRG314/RDT-Adaptive-Hierarchies/main/docs/figures/stable_partition_real.svg)
 
 The mechanism ablation matters. Remapping labels from centroids loses badly against stable ancestor-label inheritance:
 
-![Stable label ablation](docs/figures/stable_partition_ablation.svg)
+![Stable label ablation](https://raw.githubusercontent.com/RRG314/RDT-Adaptive-Hierarchies/main/docs/figures/stable_partition_ablation.svg)
 
 This does not mean RDT is the fastest partitioner. In timing checks, grid and Morton ordering were faster. The current value is the measured tradeoff: lower movement than spatial orderings, much better locality than hash-only baselines, and acceptable load balance in the tested tasks.
 
@@ -117,7 +117,7 @@ At budget `2048` on the submission-validation run:
 | Halton | 4.00 | 539.00 |
 | Latin hypercube | 4.00 | 539.40 |
 
-![RDT-cover edge-case discovery](docs/figures/coverage_ablation.svg)
+![RDT-cover edge-case discovery](https://raw.githubusercontent.com/RRG314/RDT-Adaptive-Hierarchies/main/docs/figures/coverage_ablation.svg)
 
 This result supports RDT-cover as an edge-case complement to random and low-discrepancy sampling. It also narrows the claim. The powers-only ablation found more classes than full RDT-cover on this corpus, so power and scale anchors explain much of the useful behavior. Hypothesis-targeted coverage found the most classes because it uses predicate-aware strategies.
 
@@ -127,13 +127,19 @@ The property benchmark tells the same story in a different way. RDT-cover found 
 
 The residual sampler is included because failures are useful. On the real California Housing residual field, greedy top-residual selection beats RDT-tuned selection:
 
-![Residual sampler failure case](docs/figures/residual_real.svg)
+![Residual sampler failure case](https://raw.githubusercontent.com/RRG314/RDT-Adaptive-Hierarchies/main/docs/figures/residual_real.svg)
 
 That is why the residual sampler remains a research module. It needs full PDE/PINN training loops and RAR/RAD-style baselines before it can support any training claim.
 
 ## Installation
 
-For local development:
+From PyPI:
+
+```bash
+python -m pip install rdt-adaptive-hierarchy
+```
+
+For local development from a checkout:
 
 ```bash
 python -m venv .venv
@@ -157,8 +163,7 @@ python -m pip install -e ".[dev]"
 
 ```python
 import numpy as np
-from rdt_adaptive_hierarchy import RDTStablePartition
-from rdt_adaptive_hierarchy.core.metrics import movement_fraction
+from rdt_adaptive_hierarchy import RDTStablePartition, movement_fraction
 
 points = np.random.default_rng(0).random((1000, 2))
 partitioner = RDTStablePartition(max_buckets=32).fit(points)
@@ -174,11 +179,11 @@ Expected output is a movement fraction near `0.125` for this small random exampl
 Run examples:
 
 ```bash
-PYTHONPATH=src python examples/stable_partition_basic.py
-PYTHONPATH=src python examples/cover_basic.py
-PYTHONPATH=src python examples/geometry_validation_basic.py
-PYTHONPATH=src python examples/residual_sampler_research_demo.py
-PYTHONPATH=src python examples/cover_hypothesis_basic.py
+python examples/stable_partition_basic.py
+python examples/cover_basic.py
+python examples/geometry_validation_basic.py
+python examples/residual_sampler_research_demo.py
+python examples/cover_hypothesis_basic.py
 ```
 
 ## Benchmark Commands
@@ -186,21 +191,21 @@ PYTHONPATH=src python examples/cover_hypothesis_basic.py
 Fast smoke runs:
 
 ```bash
-PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.stable_partition_bench --seeds 2 --n 2000 --output-dir results/tmp/stable_partition
-PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.cover_bench --seeds 2 --budgets 256 --output-dir results/tmp/cover
-PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.residual_sampler_bench --seeds 2 --n-side 48 --output-dir results/tmp/residual
-PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.geometry_bench --output-dir results/tmp/geometry
+python -m rdt_adaptive_hierarchy.benchmarks.stable_partition_bench --seeds 2 --n 2000 --output-dir results/tmp/stable_partition
+python -m rdt_adaptive_hierarchy.benchmarks.cover_bench --seeds 2 --budgets 256 --output-dir results/tmp/cover
+python -m rdt_adaptive_hierarchy.benchmarks.residual_sampler_bench --seeds 2 --n-side 48 --output-dir results/tmp/residual
+python -m rdt_adaptive_hierarchy.benchmarks.geometry_bench --output-dir results/tmp/geometry
 ```
 
 Tests:
 
 ```bash
-PYTHONPATH=src pytest -q
+pytest -q
 ```
 
 Current local validation: `23 passed`.
 
-GitHub Actions runs tests on Python 3.11 and 3.12, executes public examples, runs benchmark smoke checks, and builds source/wheel distributions.
+GitHub Actions runs tests on Python 3.11 and 3.12, executes public examples, runs benchmark smoke checks, builds source/wheel distributions, and checks package metadata with Twine.
 
 ## Repository Map
 

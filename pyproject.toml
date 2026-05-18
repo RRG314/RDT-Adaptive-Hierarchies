@@ -8,6 +8,24 @@ license = "MIT"
 authors = [
   {name = "Steven Reid"},
 ]
+keywords = [
+  "recursive hierarchy",
+  "stable partitioning",
+  "multiscale coverage",
+  "spatial partitioning",
+  "scientific testing",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Software Development :: Testing",
+  "Topic :: System :: Distributed Computing",
+]
 dependencies = [
   "numpy>=2.0",
   "scipy>=1.14",
@@ -21,7 +39,6 @@ baselines = [
   "pygeohash>=1.2",
   "s2sphere>=0.2",
 ]
-cover = ["hypothesis>=6.100"]
 profile = ["psutil>=5.9"]
 dev = [
   "build>=1.2",
@@ -32,14 +49,21 @@ dev = [
   "pytest>=8.0",
   "s2sphere>=0.2",
   "scikit-learn>=1.5",
+  "twine>=5.0",
 ]
 
+[project.scripts]
+rdt-stable-partition-bench = "rdt_adaptive_hierarchy.benchmarks.stable_partition_bench:main"
+rdt-cover-bench = "rdt_adaptive_hierarchy.benchmarks.cover_bench:main"
+
 [project.urls]
+Documentation = "https://github.com/RRG314/RDT-Adaptive-Hierarchies/tree/main/docs"
 Repository = "https://github.com/RRG314/RDT-Adaptive-Hierarchies"
+Issues = "https://github.com/RRG314/RDT-Adaptive-Hierarchies/issues"
 "RDT Spatial Index" = "https://github.com/RRG314/rdt-spatial-index"
 
 [build-system]
-requires = ["setuptools>=69", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
