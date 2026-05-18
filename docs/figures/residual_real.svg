@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="360" viewBox="0 0 820 360">
+<rect width="100%" height="100%" fill="white"/>
+<text x="24" y="32" font-family="Arial" font-size="20" font-weight="700">Real California residual sampling composite</text>
+<text x="24" y="52" font-family="Arial" font-size="12" fill="#555">Higher is better</text>
+<text x="24" y="78" font-family="Arial" font-size="13">top residual</text>
+<rect x="220" y="58" width="480" height="28" fill="#2a6fbb"/>
+<text x="708" y="78" font-family="Arial" font-size="13">0.4596 </text>
+<text x="24" y="118" font-family="Arial" font-size="13">top residual + gradient</text>
+<rect x="220" y="98" width="455" height="28" fill="#4b9c6d"/>
+<text x="683" y="118" font-family="Arial" font-size="13">0.4359 </text>
+<text x="24" y="158" font-family="Arial" font-size="13">residual proportional</text>
+<rect x="220" y="138" width="339" height="28" fill="#c77b30"/>
+<text x="567" y="158" font-family="Arial" font-size="13">0.3254 </text>
+<text x="24" y="198" font-family="Arial" font-size="13">uniform</text>
+<rect x="220" y="178" width="305" height="28" fill="#8a5fbf"/>
+<text x="533" y="198" font-family="Arial" font-size="13">0.2927 </text>
+<text x="24" y="238" font-family="Arial" font-size="13">RDT tuned</text>
+<rect x="220" y="218" width="296" height="28" fill="#b84a62"/>
+<text x="524" y="238" font-family="Arial" font-size="13">0.2839 </text>
+</svg>

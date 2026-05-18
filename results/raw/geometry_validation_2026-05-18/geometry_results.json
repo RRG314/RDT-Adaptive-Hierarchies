@@ -1,0 +1,96 @@
+{
+  "benchmark": "known_form_geometry_validation",
+  "status": "experimental_application_supported_by_known_form_checks",
+  "rows": [
+    {
+      "radius": 0.5,
+      "method": "rdt_recursive_depth",
+      "max_relative_error": 0.00036741236618782373,
+      "mean_relative_error": 7.38254087658631e-05,
+      "relative_errors": {
+        "disk_area": 0.00036741236618782373,
+        "sphere_volume": 1.7146776414917466e-06,
+        "cone_volume": 0.0,
+        "cube_volume": 0.0,
+        "cylinder_volume": 0.0
+      }
+    },
+    {
+      "radius": 0.5,
+      "method": "coarse_midpoint_baseline",
+      "max_relative_error": 0.0004024994347707008,
+      "mean_relative_error": 0.00010827766473197275,
+      "relative_errors": {
+        "disk_area": 0.0004024994347707008,
+        "sphere_volume": 0.00013888888888916298,
+        "cone_volume": 0.0,
+        "cube_volume": 0.0,
+        "cylinder_volume": 0.0
+      }
+    },
+    {
+      "radius": 1.0,
+      "method": "rdt_recursive_depth",
+      "max_relative_error": 0.00036741236618782373,
+      "mean_relative_error": 7.38254087658631e-05,
+      "relative_errors": {
+        "disk_area": 0.00036741236618782373,
+        "sphere_volume": 1.7146776414917466e-06,
+        "cone_volume": 0.0,
+        "cube_volume": 0.0,
+        "cylinder_volume": 0.0
+      }
+    },
+    {
+      "radius": 1.0,
+      "method": "coarse_midpoint_baseline",
+      "max_relative_error": 0.0004024994347707008,
+      "mean_relative_error": 0.00010827766473197275,
+      "relative_errors": {
+        "disk_area": 0.0004024994347707008,
+        "sphere_volume": 0.00013888888888916298,
+        "cone_volume": 0.0,
+        "cube_volume": 0.0,
+        "cylinder_volume": 0.0
+      }
+    },
+    {
+      "radius": 2.0,
+      "method": "rdt_recursive_depth",
+      "max_relative_error": 0.00036741236618782373,
+      "mean_relative_error": 7.38254087658631e-05,
+      "relative_errors": {
+        "disk_area": 0.00036741236618782373,
+        "sphere_volume": 1.7146776414917466e-06,
+        "cone_volume": 0.0,
+        "cube_volume": 0.0,
+        "cylinder_volume": 0.0
+      }
+    },
+    {
+      "radius": 2.0,
+      "method": "coarse_midpoint_baseline",
+      "max_relative_error": 0.0004024994347707008,
+      "mean_relative_error": 0.00010827766473197275,
+      "relative_errors": {
+        "disk_area": 0.0004024994347707008,
+        "sphere_volume": 0.00013888888888916298,
+        "cone_volume": 0.0,
+        "cube_volume": 0.0,
+        "cylinder_volume": 0.0
+      }
+    }
+  ],
+  "summary": {
+    "coarse_midpoint_baseline": {
+      "runs": 3,
+      "max_relative_error_mean": 0.0004024994347707008,
+      "mean_relative_error_mean": 0.00010827766473197275
+    },
+    "rdt_recursive_depth": {
+      "runs": 3,
+      "max_relative_error_mean": 0.00036741236618782373,
+      "mean_relative_error_mean": 7.38254087658631e-05
+    }
+  }
+}

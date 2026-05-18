@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="383" viewBox="0 0 820 383">
+<rect width="100%" height="100%" fill="white"/>
+<text x="24" y="32" font-family="Arial" font-size="20" font-weight="700">Coverage ablation discovered bug classes</text>
+<text x="24" y="52" font-family="Arial" font-size="12" fill="#555">Higher is better</text>
+<text x="24" y="78" font-family="Arial" font-size="13">RDT full</text>
+<rect x="220" y="58" width="480" height="28" fill="#2a6fbb"/>
+<text x="708" y="78" font-family="Arial" font-size="13">5 classes</text>
+<text x="24" y="118" font-family="Arial" font-size="13">RDT+Sobol</text>
+<rect x="220" y="98" width="480" height="28" fill="#4b9c6d"/>
+<text x="708" y="118" font-family="Arial" font-size="13">5 classes</text>
+<text x="24" y="158" font-family="Arial" font-size="13">powers only</text>
+<rect x="220" y="138" width="384" height="28" fill="#c77b30"/>
+<text x="612" y="158" font-family="Arial" font-size="13">4 classes</text>
+<text x="24" y="198" font-family="Arial" font-size="13">midpoints only</text>
+<rect x="220" y="178" width="288" height="28" fill="#8a5fbf"/>
+<text x="516" y="198" font-family="Arial" font-size="13">3 classes</text>
+<text x="24" y="238" font-family="Arial" font-size="13">boundaries only</text>
+<rect x="220" y="218" width="288" height="28" fill="#b84a62"/>
+<text x="516" y="238" font-family="Arial" font-size="13">3 classes</text>
+<text x="24" y="278" font-family="Arial" font-size="13">Sobol</text>
+<rect x="220" y="258" width="192" height="28" fill="#65737e"/>
+<text x="420" y="278" font-family="Arial" font-size="13">2 classes</text>
+<text x="24" y="318" font-family="Arial" font-size="13">random</text>
+<rect x="220" y="298" width="192" height="28" fill="#2a6fbb"/>
+<text x="420" y="318" font-family="Arial" font-size="13">2 classes</text>
+</svg>

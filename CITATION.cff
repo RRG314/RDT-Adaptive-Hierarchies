@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software, cite the repository and exact commit."
+title: "RDT Adaptive Hierarchies"
+authors:
+  - family-names: "Reid"
+    given-names: "Steven"
+repository-code: "https://github.com/RRG314/RDT-Adaptive-Hierarchies"
+license: "MIT"
+version: "0.1.0"
+date-released: "2026-05-18"
+keywords:
+  - recursive hierarchy
+  - stable partitioning
+  - multiscale coverage
+  - benchmark
+

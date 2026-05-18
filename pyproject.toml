@@ -1,0 +1,33 @@
+[project]
+name = "rdt-adaptive-hierarchy"
+version = "0.1.0"
+description = "Deterministic recursive hierarchies for stable partitioning and multiscale coverage."
+requires-python = ">=3.11"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+  {name = "Steven Reid"},
+]
+dependencies = [
+  "numpy>=2.0",
+  "scipy>=1.14",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0"]
+data = ["scikit-learn>=1.5"]
+
+[project.urls]
+Repository = "https://github.com/RRG314/RDT-Adaptive-Hierarchies"
+
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q"
