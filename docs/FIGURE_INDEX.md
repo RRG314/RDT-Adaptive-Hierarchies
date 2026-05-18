@@ -1,11 +1,45 @@
 # Figure Index
 
-Figures are simple SVGs generated from stored benchmark summaries. They are not decorative.
+The figures in this repo are meant to explain the mechanism and evidence, not to decorate the page. Each one supports a specific bounded claim or limitation.
 
-| Figure | File | Claim supported |
-|---|---|---|
-| Real stable partition score | `docs/figures/stable_partition_real.svg` | RDT stable labels improve the tested California Housing movement/locality/load score. |
-| Coverage ablation | `docs/figures/coverage_ablation.svg` | RDT-cover components discover more seeded bug classes than random/Sobol in current tests. |
-| Real residual sampling | `docs/figures/residual_real.svg` | Residual sampler evidence is mixed; top residual beats RDT on real California residuals. |
-| 50k timing | `docs/figures/performance_50k_uniform.svg` | RDT is not the fastest raw partitioner. |
+## Stable Label Mechanism
 
+![Stable label inheritance mechanism](figures/rdt_stable_label_mechanism.svg)
+
+This figure explains the core mechanism. When a labeled cell splits during resize, one child inherits the parent label and the other child gets a new label. The benchmark ablation tests whether this inheritance rule matters.
+
+## Stable Partition: Real Data
+
+![California Housing resize score](figures/stable_partition_real.svg)
+
+This figure summarizes the California Housing coordinate benchmark. RDT stable labels have the best combined movement/locality/load score for the tested resize pairs. The figure supports a tradeoff claim, not a raw speed claim.
+
+## Stable Label Ablation
+
+![Stable label ablation](figures/stable_partition_ablation.svg)
+
+This figure is the most important mechanism evidence. It compares stable labels with remapped labels, holding the recursive structure fixed. Stable labels win on the representative tasks shown.
+
+## RDT-Cover Edge-Case Discovery
+
+![RDT-cover edge-case discovery](figures/coverage_ablation.svg)
+
+This figure shows how many seeded numerical edge-case classes were found by each coverage method. Full and hybrid RDT schedules found all five classes. Random and Sobol found two in this benchmark.
+
+## Residual Sampler Failure Case
+
+![Residual sampler real-data failure](figures/residual_real.svg)
+
+This figure shows why residual sampling is marked research-only. On a real California Housing residual field, top-residual selection beats RDT-tuned selection.
+
+## Geometry Validation Error
+
+![Geometry validation error](figures/geometry_error.svg)
+
+This figure shows the selected known-form geometry check. The result is small and bounded: RDT improves the included midpoint baseline slightly, but stronger numerical integration baselines are still needed.
+
+## Runtime Caveat
+
+![Runtime caveat](figures/performance_50k_uniform.svg)
+
+This figure prevents overclaiming. RDT is not the fastest raw partitioner in current timing checks. The supported claim is about the movement/locality/load tradeoff.

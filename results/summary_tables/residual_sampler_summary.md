@@ -1,5 +1,7 @@
 # Residual Sampler Summary
 
+![Residual sampler real-data failure](../../docs/figures/residual_real.svg)
+
 ## Setup
 
 Task: select candidate points from residual fields using residual score, gradient proxy, and coverage pressure.
@@ -23,8 +25,9 @@ The residual sampler is mixed. It can help when coverage matters and the field h
 
 These are point-selection metrics. They are not PDE or PINN training results.
 
+The real California residual result is a useful negative result: the current RDT sampler should not be presented as a solver-training improvement. It should only be used as a research candidate until full training benchmarks exist.
+
 ## Raw Artifacts
 
 - `results/raw/ablation_5seed_2026-05-18/ablation_results.json`
 - `results/raw/real_public_data_2026-05-18/real_public_data_results.json`
-

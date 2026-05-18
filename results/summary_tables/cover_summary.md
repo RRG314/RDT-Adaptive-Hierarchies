@@ -1,5 +1,7 @@
 # RDT-Cover Summary
 
+![RDT-cover edge-case discovery](../../docs/figures/coverage_ablation.svg)
+
 ## Setup
 
 Task: generate numeric test points in a two-dimensional domain and count predeclared seeded edge-case classes.
@@ -24,6 +26,8 @@ Baselines: random uniform, Sobol, Latin hypercube.
 
 The RDT-specific components matter in the seeded corpus. Powers, midpoints, and boundaries each find part of the failure set. The hybrid keeps full bug-class discovery while improving space fill compared with RDT-only.
 
+The important result is not that RDT-cover has the lowest discrepancy. Sobol has the best discrepancy, as expected, but misses the seeded edge classes. RDT-cover intentionally spends budget on edge anchors, so its value should be judged by failure discovery at fixed budget, not fill quality alone.
+
 ## Limitations
 
 The corpus is synthetic and designed around numerical edge classes. Real bug corpora and Hypothesis comparisons are needed before public claims become stronger.
@@ -32,4 +36,3 @@ The corpus is synthetic and designed around numerical edge classes. Real bug cor
 
 - `results/raw/ablation_5seed_2026-05-18/ablation_results.json`
 - `results/raw/reproduce_deep_5seed_2026-05-18/aggregate_results.json`
-

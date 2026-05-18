@@ -1,51 +1,100 @@
 # RDT Adaptive Hierarchies
 
-RDT Adaptive Hierarchies is a small research/software project for deterministic recursive partitions. It focuses on a specific idea: a hierarchy can carry useful metadata, especially stable labels, ancestor paths, depth/shell information, and coverage schedules. Those pieces can be measured directly with movement, locality, load balance, and edge-case discovery tests.
+RDT Adaptive Hierarchies is a Python research package for deterministic recursive partitions with stable labels, depth metadata, and deterministic coverage schedules. The package is built around a smaller, testable version of the RDT idea: recursive structure is useful when it preserves something measurable during refinement or resize.
 
-This repository is not a continuation of every earlier RDT notebook idea. Earlier experiments made much broader claims. The evidence here supports a smaller and more useful project: stability-preserving partitioning and multiscale coverage.
+The two main applications in this repo are:
 
-## The Problem
+1. `rdt-stable-partition`: partition points into buckets, then resize the number of buckets while trading off movement, locality, and load.
+2. `rdt-cover`: generate deterministic numerical test cases at boundaries, midpoints, powers of ten, corners, and shell-like scale transitions.
 
-Many systems need to resize or refine a partition without moving everything. Hashing methods can minimize movement, but they usually discard locality. Space-filling curves and grids preserve locality, but they can move many points when the number of buckets changes. RDT stable partitioning studies the tradeoff between those goals.
+The repo also includes bounded experimental modules for recursive-depth geometry validation, residual sampling, and shell diagnostics. Those modules are documented as limited research tools, not headline claims.
 
-Numerical testing has a related problem. Pure random and low-discrepancy sampling can fill a space evenly, but they may miss specific boundary, scale, or cancellation cases. RDT-cover adds deterministic boundary, midpoint, power-scale, and shell-oriented cases as a complement to standard sampling.
+![Stable label inheritance mechanism](docs/figures/rdt_stable_label_mechanism.svg)
+
+## Why This Exists
+
+Many systems need to assign points, keys, tasks, or regions to buckets. When the bucket count changes, the assignment should not move everything. Consistent hashing methods are good at minimizing movement, but they normally do not preserve spatial locality. Spatial orderings and grids can preserve locality, but they can move many points during resize or create load imbalance.
+
+RDT stable partitioning tests a different compromise. It builds a deterministic recursive hierarchy, assigns labels to active cells, and preserves ancestor labels when a cell splits. That lets one child keep the parent label while the new branch receives a new label. The package measures whether this mechanism improves the movement/locality/load tradeoff.
+
+Numerical testing has a related finite-budget problem. Random and low-discrepancy sampling fill a space well, but they can miss specific boundary or scale cases. RDT-cover adds deterministic edge anchors before optional Sobol fill, so it is best understood as a complement to standard sampling rather than a replacement.
 
 ## What RDT Means Here
 
-In this repo, RDT means a deterministic recursive hierarchy:
+In this repository, RDT means a deterministic recursive hierarchy:
 
-- points are recursively split into cells,
-- each cell has a depth and ancestor path,
-- active cells receive stable labels,
-- when a cell splits, one child inherits the parent label,
-- coverage schedules can target boundaries, midpoints, powers, and shells.
+- The input is a finite numeric array `X` with shape `(n_points, n_dimensions)`.
+- The root cell contains all points.
+- Cells are recursively split by a deterministic spread/median rule.
+- Each cell has a depth, parent, descendants, and path from the root.
+- Active cells receive stable labels.
+- During resize, one child inherits the parent label and only the new branch receives a new label.
+- Coverage routines can target boundaries, midpoints, powers, corners, and shell-like transitions.
 
-The most important mechanism is stable ancestor-label inheritance. Recursion by itself is not the claim.
+The supported mechanism is stable ancestor-label inheritance plus deterministic coverage. Recursion by itself is not the claim.
 
-## What Is Supported
+## What Is Supported By Current Evidence
 
-Current evidence supports these bounded statements:
+The current evidence snapshot is from repeated local benchmark runs on 2026-05-18. It is strong enough for technical review and further development, but not yet enough for a broad theory paper.
 
-- Stable labels improve the movement/locality/load tradeoff in the tested resize tasks.
-- RDT-cover finds seeded numerical edge-case classes that random, Sobol, and Latin hypercube miss in the current benchmark.
-- Recursive-depth geometry validation can reproduce selected known forms with low error.
-- Residual sampling is mixed and remains research-only.
-- Shell drift is diagnostic-only.
-- Recursive delta preprocessing is a narrow observation for ramp-like byte sequences, not an active package module.
+| Area | Current evidence | Interpretation |
+|---|---|---|
+| Stable partitioning | RDT stable labels beat Jump Hash, Morton ordering, grid, modulo hash, rendezvous hash, and remapped-label ablations on the tested combined movement/locality/load score. | Strongest current direction. The claim is a tradeoff claim, not raw speed superiority. |
+| RDT-cover | Full RDT-cover and RDT+Sobol found all 5 seeded numerical edge-case classes at fixed budget; random, Sobol, and Latin hypercube found 2. | Promising deterministic edge-case generator. Needs Hypothesis and real bug-corpus comparisons. |
+| Geometry validation | Recursive-depth schedule had max relative error `0.0003674` on selected known-form checks; coarse midpoint baseline had `0.0004025`. | Bounded numerical validation result, not a new geometry theory. |
+| Residual sampling | RDT tuned wins on selected synthetic sharp-front and two-hotspot fields, but loses to greedy top residual on oscillatory and real California residual fields. | Research-only. No PDE/PINN training claim is supported. |
+| Shell drift | Some synthetic shifts are detected, but simple histogram and mean/std baselines are competitive or better. | Diagnostic-only. Not an anomaly detector claim. |
+| Recursive delta codec | Helps ramp-like synthetic bytes but loses to standard compressors on text and CSV corpora. | Narrow transform observation. Not a general compressor. |
 
-## What Is Not Claimed
+## Headline Results
 
-This project does not claim that RDT is:
+### Stable Partitioning
 
-- a universal algorithm,
-- a universal entropy theory,
-- a cryptographic primitive,
-- a turbulence or magnetohydrodynamics closure theory,
-- a general compressor,
-- a general anomaly detector,
-- a replacement for all standard spatial indexes or testing tools.
+The stable partition benchmark resizes from `k1` buckets to `k2` buckets. Lower combined score is better:
 
-Raw RDT spatial index adapters are not promoted as part of this release. They matched exactness in prior tests, but did not show speed superiority. The spatially useful claim in this repo is stable partitioning under resize.
+`movement + 0.45 * locality + 0.20 * max(0, imbalance - 1)`.
+
+On California Housing coordinates (`n = 20,640`):
+
+| Resize | RDT stable | Jump Hash | Morton sort | Principal sort |
+|---|---:|---:|---:|---:|
+| 16 -> 20 | 0.4386 | 0.6583 | 0.9195 | 0.8942 |
+| 32 -> 40 | 0.4945 | 0.6664 | 0.9674 | 0.9529 |
+| 64 -> 80 | 0.4641 | 0.6790 | 0.9830 | 0.9630 |
+
+![California Housing resize score](docs/figures/stable_partition_real.svg)
+
+The mechanism ablation matters. Remapping labels from centroids loses badly against stable ancestor-label inheritance:
+
+![Stable label ablation](docs/figures/stable_partition_ablation.svg)
+
+This does not mean RDT is the fastest partitioner. In timing checks, grid and Morton ordering were faster. The current value is the measured tradeoff: lower movement than spatial orderings, much better locality than hash-only baselines, and acceptable load balance in the tested tasks.
+
+### RDT-Cover
+
+The RDT-cover benchmark generates numeric test inputs and counts predeclared edge-case classes. The seeded classes include zero boundary, large cancellation, power transition, outer corner, and thin annulus.
+
+| Method | Mean bug classes found | Mean total hits |
+|---|---:|---:|
+| RDT full | 5.00 | 75.20 |
+| RDT+Sobol | 5.00 | 70.20 |
+| Powers-only | 4.00 | 89.40 |
+| Midpoints-only | 3.00 | 63.00 |
+| Boundaries-only | 3.00 | 40.00 |
+| Random uniform | 2.00 | 35.60 |
+| Sobol | 2.00 | 34.20 |
+
+![RDT-cover edge-case discovery](docs/figures/coverage_ablation.svg)
+
+This result supports RDT-cover as an edge-case complement to random and low-discrepancy sampling. It does not yet show superiority over property-based testing, fuzzing, Hypothesis strategies, or real numerical bug corpora.
+
+### Residual Sampling Failure Case
+
+The residual sampler is included because failures are useful. On the real California Housing residual field, greedy top-residual selection beats RDT-tuned selection:
+
+![Residual sampler failure case](docs/figures/residual_real.svg)
+
+That is why the residual sampler remains a research module. It needs full PDE/PINN training loops and RAR/RAD-style baselines before it can support any training claim.
 
 ## Installation
 
@@ -57,7 +106,7 @@ python -m venv .venv
 python -m pip install -e ".[test]"
 ```
 
-The core package depends on NumPy and SciPy. Public-data reruns may also need scikit-learn:
+Public-data reruns use scikit-learn:
 
 ```bash
 python -m pip install -e ".[test,data]"
@@ -79,58 +128,74 @@ labels_20 = partitioner.assign_training(20)
 print(movement_fraction(labels_16, labels_20))
 ```
 
-Run the examples:
+Expected output is a movement fraction near `0.125` for this small random example.
+
+Run examples:
 
 ```bash
 PYTHONPATH=src python examples/stable_partition_basic.py
 PYTHONPATH=src python examples/cover_basic.py
 PYTHONPATH=src python examples/geometry_validation_basic.py
+PYTHONPATH=src python examples/residual_sampler_research_demo.py
 ```
 
-## Main Applications
+## Benchmark Commands
 
-`rdt-stable-partition` is the main supported application. It builds a recursive hierarchy and replays split history to assign stable labels during resize.
+Fast smoke runs:
 
-`rdt-cover` generates deterministic numeric test cases that emphasize boundaries, midpoints, powers of ten, and shell-like scale transitions. It is meant to complement, not replace, property-based testing and low-discrepancy sampling.
+```bash
+PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.stable_partition_bench --seeds 2 --n 2000 --output-dir results/tmp/stable_partition
+PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.cover_bench --seeds 2 --budget 256 --output-dir results/tmp/cover
+PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.residual_sampler_bench --seeds 2 --n-side 48 --output-dir results/tmp/residual
+PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.geometry_bench --output-dir results/tmp/geometry
+```
 
-`recursive-depth geometry validation` is included as a bounded experimental module. It validates known forms; it does not assert a new geometry theory.
-
-`rdt-residual-sampler` is research-only. It is useful for studying coverage-preserving residual selection, but current evidence does not support a broad PDE or PINN training claim.
-
-## Benchmark Summary
-
-The strongest current result is stable partitioning. On synthetic and California Housing coordinate resize tasks, RDT stable labels produce a better movement/locality/load score than the tested hashing and ordering baselines. Raw runtime is not always fastest; grid and Morton baselines are faster in timing checks.
-
-RDT-cover found all five seeded numerical edge-case classes in the current benchmark. Random, Sobol, and Latin hypercube found two. This is useful evidence, but it is still a seeded corpus. Real bug corpora and Hypothesis integration remain open work.
-
-See:
-
-- [docs/benchmark_interpretation.md](docs/benchmark_interpretation.md)
-- [results/README.md](results/README.md)
-- [results/summary_tables/stable_partition_summary.md](results/summary_tables/stable_partition_summary.md)
-- [results/summary_tables/cover_summary.md](results/summary_tables/cover_summary.md)
-
-## Reproducibility
-
-The repo includes raw benchmark artifacts from the current run under `results/raw/`, concise summaries under `results/summary_tables/`, and rerun commands in [docs/reproducibility.md](docs/reproducibility.md).
-
-Core checks:
+Tests:
 
 ```bash
 PYTHONPATH=src pytest -q
-PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.stable_partition_bench
-PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.cover_bench
 ```
+
+Current local validation: `14 passed`.
+
+## Repository Map
+
+| Path | Purpose |
+|---|---|
+| `src/rdt_adaptive_hierarchy/core/` | Core cells, hierarchy, labels, metrics, coverage, refinement, validation. |
+| `src/rdt_adaptive_hierarchy/applications/` | Stable partitioning, RDT-cover, residual sampler, geometry validation, shell diagnostics. |
+| `src/rdt_adaptive_hierarchy/baselines/` | Jump Hash, rendezvous hashing, Morton ordering, grid, random, Sobol, Latin hypercube. |
+| `src/rdt_adaptive_hierarchy/benchmarks/` | Runnable benchmark entry points. |
+| `examples/` | Short scripts that show the public API. |
+| `docs/` | Definitions, framework specification, claims, limitations, prior work, reproducibility. |
+| `results/` | Interpreted summaries and raw benchmark artifacts. |
+| `paper/` | Working methods-paper draft material. |
+
+## What Is Not Claimed
+
+This project does not claim that RDT is:
+
+- a universal algorithm,
+- a universal entropy theory,
+- a cryptographic primitive,
+- a turbulence or magnetohydrodynamics closure theory,
+- a general compressor,
+- a general anomaly detector,
+- a replacement for all standard spatial indexes or testing tools.
+
+Raw RDT spatial indexes are not promoted in this release. Prior adapters matched exactness, but did not establish speed superiority. The spatially useful claim here is stable partitioning under resize.
 
 ## Relation To Known Methods
 
-The closest neighbors are consistent hashing, Jump Consistent Hash, rendezvous hashing, Morton/Z-order layouts, geospatial hierarchies such as H3 and S2, tree-based spatial indexes, property-based testing, quasi-Monte Carlo sampling, adaptive random testing, and residual adaptive refinement.
+The closest neighbors are consistent hashing, Jump Consistent Hash, rendezvous hashing, Morton/Z-order layouts, tree-based spatial indexes, geospatial hierarchies such as H3 and S2, property-based testing, quasi-Monte Carlo sampling, adaptive random testing, and residual adaptive refinement.
 
-RDT should be compared against those methods before making stronger public claims. See [docs/relation_to_prior_work.md](docs/relation_to_prior_work.md).
+RDT should be compared against those methods before stronger public claims. Current missing baselines include Hilbert curves, H3, S2, geohash, virtual-node consistent hashing, Hypothesis, and real numerical bug corpora.
 
 ## Project Status
 
-This is a pre-release research repository. It is suitable for technical review, reproduction, and focused development. It is not yet ready for a broad paper claim. The next serious work is stronger external baselines: Hilbert/H3/S2/geohash for stable partitioning and Hypothesis/real bug corpora for RDT-cover.
+This is a pre-release research package. It is ready for technical review, reproduction, and focused development. It is not ready for broad claims of general superiority.
+
+The best next development target is `rdt-stable-partition`, followed by `rdt-cover`. Residual sampling, shell drift, and codec-related ideas should stay experimental until they beat stronger baselines on real tasks.
 
 ## Citation
 
@@ -139,4 +204,3 @@ Use the metadata in [CITATION.cff](CITATION.cff). Until the method is published,
 ## License
 
 MIT. See [LICENSE](LICENSE).
-

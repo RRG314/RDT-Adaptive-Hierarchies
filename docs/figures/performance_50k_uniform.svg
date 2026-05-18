@@ -1,17 +1,38 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="820" height="360" viewBox="0 0 820 360">
-<rect width="100%" height="100%" fill="white"/>
-<text x="24" y="32" font-family="Arial" font-size="20" font-weight="700">50k partition timing, synthetic uniform</text>
-<text x="24" y="52" font-family="Arial" font-size="12" fill="#555">Lower is better</text>
-<text x="24" y="78" font-family="Arial" font-size="13">grid</text>
-<rect x="220" y="58" width="18" height="28" fill="#2a6fbb"/>
-<text x="246" y="78" font-family="Arial" font-size="13">0.004229 sec</text>
-<text x="24" y="118" font-family="Arial" font-size="13">Morton</text>
-<rect x="220" y="98" width="50" height="28" fill="#4b9c6d"/>
-<text x="278" y="118" font-family="Arial" font-size="13">0.01173 sec</text>
-<text x="24" y="158" font-family="Arial" font-size="13">RDT stable</text>
-<rect x="220" y="138" width="151" height="28" fill="#c77b30"/>
-<text x="379" y="158" font-family="Arial" font-size="13">0.03501 sec</text>
-<text x="24" y="198" font-family="Arial" font-size="13">Jump Hash</text>
-<rect x="220" y="178" width="480" height="28" fill="#8a5fbf"/>
-<text x="708" y="198" font-family="Arial" font-size="13">0.111 sec</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="560" viewBox="0 0 980 560">
+<rect width="100%" height="100%" fill="#fbfbf8"/>
+<text x="100" y="38" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700" fill="#222">Runtime caveat on 50k uniform points</text>
+<text x="100" y="66" font-family="Inter, Arial, sans-serif" font-size="14" fill="#555">Lower is better. RDT is not promoted as the fastest raw partitioner.</text>
+<line x1="100" y1="455.0" x2="940" y2="455.0" stroke="#e2e0d8" stroke-width="1"/>
+<text x="90" y="459.0" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">0.00</text>
+<line x1="100" y1="384.0" x2="940" y2="384.0" stroke="#e2e0d8" stroke-width="1"/>
+<text x="90" y="388.0" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">0.00</text>
+<line x1="100" y1="313.0" x2="940" y2="313.0" stroke="#e2e0d8" stroke-width="1"/>
+<text x="90" y="317.0" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">0.01</text>
+<line x1="100" y1="242.0" x2="940" y2="242.0" stroke="#e2e0d8" stroke-width="1"/>
+<text x="90" y="246.0" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">0.01</text>
+<line x1="100" y1="171.0" x2="940" y2="171.0" stroke="#e2e0d8" stroke-width="1"/>
+<text x="90" y="175.0" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">0.02</text>
+<line x1="100" y1="100.0" x2="940" y2="100.0" stroke="#e2e0d8" stroke-width="1"/>
+<text x="90" y="104.0" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#666">0.02</text>
+<line x1="100" y1="100" x2="100" y2="455" stroke="#333"/>
+<line x1="100" y1="455" x2="940" y2="455" stroke="#333"/>
+<text x="26" y="277.5" transform="rotate(-90, 26, 277.5)" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">seconds</text>
+<text x="520.0" y="483" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">Build+assign</text>
+<rect x="100.0" y="310.0" width="205.5" height="145.0" fill="#4C78A8" rx="2"/>
+<text x="202.8" y="305.0" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="11" fill="#222">0.01</text>
+<rect x="311.5" y="441.8" width="205.5" height="13.2" fill="#54A24B" rx="2"/>
+<text x="414.2" y="436.8" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="11" fill="#222">0.00</text>
+<rect x="523.0" y="422.1" width="205.5" height="32.9" fill="#B279A2" rx="2"/>
+<text x="625.8" y="417.1" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="11" fill="#222">0.00</text>
+<rect x="734.5" y="138.0" width="205.5" height="317.0" fill="#F58518" rx="2"/>
+<text x="837.2" y="133.0" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="11" fill="#222">0.02</text>
+<rect x="100" y="510" width="14" height="14" fill="#4C78A8" rx="2"/>
+<text x="120" y="522" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">RDT stable</text>
+<rect x="270" y="510" width="14" height="14" fill="#54A24B" rx="2"/>
+<text x="290" y="522" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">Grid</text>
+<rect x="440" y="510" width="14" height="14" fill="#B279A2" rx="2"/>
+<text x="460" y="522" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">Morton</text>
+<rect x="610" y="510" width="14" height="14" fill="#F58518" rx="2"/>
+<text x="630" y="522" font-family="Inter, Arial, sans-serif" font-size="13" fill="#333">Jump Hash</text>
+<text x="940" y="542" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" fill="#777">Machine-local timing; use as caveat, not universal benchmark</text>
 </svg>

@@ -1,5 +1,7 @@
 # Stable Partition Summary
 
+![California Housing resize score](../../docs/figures/stable_partition_real.svg)
+
 ## Setup
 
 Task: resize partition labels while balancing movement, locality, and load.
@@ -22,6 +24,12 @@ On real California Housing coordinates:
 
 The stable-label ablation is stronger evidence than the headline score. Remapped labels lose on every tested resize task, which supports the claim that ancestor-label inheritance is doing real work.
 
+![Stable label ablation](../../docs/figures/stable_partition_ablation.svg)
+
+## What The Numbers Mean
+
+Jump Hash has low movement but weak locality because it hashes labels without using geometry. Morton sort preserves spatial order but moves many points under the tested resize. RDT stable labels keep enough ancestry to reduce movement while preserving more locality than the hash baselines.
+
 ## Limitations
 
 RDT is not the fastest raw method. In 50k synthetic timing checks, grid and Morton were faster. The current claim is a tradeoff claim, not a speed claim.
@@ -34,4 +42,3 @@ Missing baselines include Hilbert, H3, S2, geohash, and virtual-node consistent 
 - `results/raw/reproduce_deep_5seed_2026-05-18/aggregate_summary.csv`
 - `results/raw/real_public_data_2026-05-18/real_public_data_results.json`
 - `results/raw/artifact_performance_5seed_2026-05-18/artifact_check_results.json`
-

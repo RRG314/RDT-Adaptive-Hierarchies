@@ -1,22 +1,81 @@
 # Figures Plan
 
-## Figure 1: Stable Label Inheritance
+This file lists the figures that already exist and how they would be used in a future methods paper.
 
-Show a parent cell splitting while one child keeps the parent label. Purpose: explain the mechanism.
+## Figure 1: Stable Ancestor-Label Inheritance
 
-## Figure 2: Stable Partition Tradeoff
+File: `docs/figures/rdt_stable_label_mechanism.svg`
 
-Use `docs/figures/stable_partition_real.svg` as a starting point. Purpose: show real California Housing combined scores.
+Purpose: explain the mechanism before showing results. The figure should appear in the method section near the definition of stable labels.
 
-## Figure 3: Coverage Ablation
+Caption draft:
 
-Use `docs/figures/coverage_ablation.svg`. Purpose: show which coverage components find seeded bug classes.
+When a labeled cell splits, one child inherits the parent label and only the new branch receives a new label. This lets the partition resize by extending the existing hierarchy rather than assigning every active cell from scratch.
 
-## Figure 4: Residual Failure Case
+## Figure 2: California Housing Resize Score
 
-Use `docs/figures/residual_real.svg`. Purpose: show that residual sampling is not a broad win.
+File: `docs/figures/stable_partition_real.svg`
 
-## Figure 5: Runtime Caveat
+Purpose: show the strongest real-data stable partition result.
 
-Use `docs/figures/performance_50k_uniform.svg`. Purpose: show that RDT is not the fastest raw partitioner.
+Caption draft:
 
+Combined movement/locality/load score on California Housing coordinates. Lower is better. RDT stable labels outperform Jump Hash and Morton ordering on the tested resize pairs, but this score is a tradeoff metric rather than a raw runtime metric.
+
+## Figure 3: Stable Label Ablation
+
+File: `docs/figures/stable_partition_ablation.svg`
+
+Purpose: show that stable ancestor-label inheritance is the working mechanism.
+
+Caption draft:
+
+Holding the recursive structure fixed, remapping labels loses to stable ancestor-label inheritance on representative real and synthetic resize tasks. This supports the claim that stable label inheritance matters, not just recursive splitting.
+
+## Figure 4: RDT-Cover Edge-Case Discovery
+
+File: `docs/figures/coverage_ablation.svg`
+
+Purpose: show RDT-cover as the second supported application.
+
+Caption draft:
+
+Mean seeded numerical edge-case classes found at fixed budget. Full and hybrid RDT schedules found all five classes, while random and Sobol found two. The benchmark is synthetic and should be followed by real bug-corpus tests.
+
+## Figure 5: Residual Sampler Failure Case
+
+File: `docs/figures/residual_real.svg`
+
+Purpose: keep the paper honest. This figure belongs in the limitations section.
+
+Caption draft:
+
+On a real California Housing residual field, greedy top-residual selection outperforms RDT-tuned residual sampling. The residual sampler remains a research module until it improves downstream solver or training metrics against RAR/RAD-style baselines.
+
+## Figure 6: Geometry Validation Error
+
+File: `docs/figures/geometry_error.svg`
+
+Purpose: show the bounded known-form geometry result.
+
+Caption draft:
+
+Selected known-form geometry validation errors. The RDT schedule slightly improves the coarse midpoint baseline, but stronger quadrature and QMC baselines are required before stronger numerical-method claims.
+
+## Figure 7: Runtime Caveat
+
+File: `docs/figures/performance_50k_uniform.svg`
+
+Purpose: prevent speed overclaims.
+
+Caption draft:
+
+Machine-local timing on 50k synthetic uniform points. RDT is not the fastest raw partitioner; its current contribution is the movement/locality/load tradeoff.
+
+## Missing Figures Before A Paper
+
+- Confidence interval or seed-distribution plots for stable partition scores.
+- Runtime and memory scaling across multiple `n`.
+- Coverage time-to-first-failure curves.
+- Hypothesis or adaptive-random-testing comparison once implemented.
+- A schematic comparing RDT stable partitioning with Jump Hash and Morton behavior under resize.
