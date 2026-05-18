@@ -14,7 +14,7 @@ A deterministic recursive hierarchy with stable ancestor-label inheritance can p
 
 Partitioned systems often need to change the number of buckets without moving most assigned points. Hash-based methods can reduce movement, but they typically ignore geometric locality. Spatial orderings and grids preserve locality, but they may move many points or produce load imbalance during resize. This work studies RDT Adaptive Hierarchies, a deterministic recursive hierarchy that carries depth, path, and stable-label metadata. The central mechanism is ancestor-label inheritance: when a cell splits, one child keeps the parent label and the new branch receives a new label.
 
-We evaluate the method on synthetic point sets and California Housing coordinates using a combined movement/locality/load score. In the current benchmark, stable RDT labels outperform Jump Hash, rendezvous hashing, Morton ordering, grid partitioning, principal sorting, modulo hashing, and a remapped-label ablation on the tested resize tasks. We also introduce RDT-cover, a deterministic numerical coverage schedule that targets boundaries, midpoints, powers of ten, corners, and shell-like scale transitions. In a seeded numerical edge-case benchmark, full RDT-cover and RDT+Sobol find all five predefined edge-case classes, while random, Sobol, and Latin hypercube find two.
+We evaluate the method on synthetic point sets and California Housing coordinates using a combined movement/locality/load score. In the current benchmark, stable RDT labels outperform Jump Hash, virtual-node consistent hashing, rendezvous hashing, Morton ordering, Hilbert ordering, H3, S2, geohash, grid partitioning, principal sorting, modulo hashing, and a remapped-label ablation on the tested resize tasks. We also introduce RDT-cover, a deterministic numerical coverage schedule that targets boundaries, midpoints, powers of ten, corners, and shell-like scale transitions. In a seeded numerical edge-case benchmark, full RDT-cover, RDT+Sobol, and Hypothesis-targeted coverage find all five predefined edge-case classes, while random, Sobol, and Latin hypercube find fewer.
 
 The paper should make bounded claims only. RDT is not presented as a universal algorithm, a cryptographic primitive, a general compressor, or a replacement for mature spatial indexing systems. Residual sampling, shell drift, and recursive delta preprocessing are included only as limitations and research directions.
 
@@ -187,9 +187,9 @@ RDT is useful when hierarchy metadata lets the system preserve or target somethi
 
 ## Missing Before Submission
 
-- Hilbert, H3, S2, geohash, and virtual-node consistent hashing baselines.
 - Larger and more varied real partition workloads.
-- Hypothesis and adaptive random testing comparisons for RDT-cover.
+- Virtual-node count, H3/S2/geohash resolution, and Hilbert bit-depth sensitivity.
+- Adaptive random testing comparisons for RDT-cover.
 - Real numerical bug or mutant corpus for coverage.
 - Runtime and memory scaling at larger `n`.
 - Confidence intervals in the polished result tables.

@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Deterministic recursive hierarchies for stable partitioning and multiscale coverage."
 requires-python = ">=3.11"
 readme = "README.md"
-license = {file = "LICENSE"}
+license = "MIT"
 authors = [
   {name = "Steven Reid"},
 ]
@@ -16,6 +16,23 @@ dependencies = [
 [project.optional-dependencies]
 test = ["pytest>=8.0"]
 data = ["scikit-learn>=1.5"]
+baselines = [
+  "h3>=4.0",
+  "pygeohash>=1.2",
+  "s2sphere>=0.2",
+]
+cover = ["hypothesis>=6.100"]
+profile = ["psutil>=5.9"]
+dev = [
+  "build>=1.2",
+  "h3>=4.0",
+  "hypothesis>=6.100",
+  "psutil>=5.9",
+  "pygeohash>=1.2",
+  "pytest>=8.0",
+  "s2sphere>=0.2",
+  "scikit-learn>=1.5",
+]
 
 [project.urls]
 Repository = "https://github.com/RRG314/RDT-Adaptive-Hierarchies"

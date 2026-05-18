@@ -4,7 +4,7 @@ RDT Adaptive Hierarchies sits near several established areas. The current repo u
 
 ## Consistent Hashing
 
-Consistent hashing addresses the problem of assigning keys to buckets while minimizing movement when buckets change. RDT stable partitioning shares the movement problem but adds spatial locality and load measurement. It should be compared against consistent hashing with virtual nodes before stronger claims.
+Consistent hashing addresses the problem of assigning keys to buckets while minimizing movement when buckets change. RDT stable partitioning shares the movement problem but adds spatial locality and load measurement. The current release includes Jump Hash, rendezvous hashing, and virtual-node consistent hashing baselines.
 
 Jump Consistent Hash is a compact consistent hash method by Lamping and Veach. It is a primary movement baseline in this repo. See `REFERENCES.md`.
 
@@ -12,11 +12,11 @@ Rendezvous hashing, also called highest-random-weight hashing, is another standa
 
 ## Space-Filling Curves And Spatial Orderings
 
-Morton/Z-order maps multidimensional points into a one-dimensional ordering that tends to preserve locality. Morton partitioning is faster than RDT in current timing checks and remains a necessary baseline. Hilbert-curve baselines should be added before stronger spatial-partition claims.
+Morton/Z-order and Hilbert curves map multidimensional points into one-dimensional orderings that tend to preserve locality. Both are included as spatial-ordering baselines. Morton partitioning is faster than RDT in current timing checks and remains a necessary speed caveat.
 
 ## Geospatial Hierarchies
 
-H3 and S2 are mature geospatial indexing systems. H3 partitions the world into hierarchical hexagonal cells. S2 uses a cell hierarchy on the sphere. RDT differs because it is data-adaptive rather than a fixed global grid, but that does not imply superiority. H3, S2, and geohash comparisons are still needed.
+H3 and S2 are mature geospatial indexing systems. H3 partitions the world into hierarchical hexagonal cells. S2 uses a cell hierarchy on the sphere. RDT differs because it is data-adaptive rather than a fixed global grid, but that does not imply superiority. H3, S2, and geohash ordering baselines are now included; richer real geospatial workloads are still needed.
 
 ## Tree-Based Spatial Indexes
 
@@ -32,7 +32,7 @@ Sobol and Halton sequences are low-discrepancy sampling methods used in quasi-Mo
 
 ## Property-Based Testing And Adaptive Random Testing
 
-Hypothesis and similar tools generate test cases from user-defined strategies. Adaptive random testing tries to spread test cases to improve failure discovery. RDT-cover should be compared against both. Current evidence is limited to a seeded numerical corpus.
+Hypothesis and similar tools generate test cases from user-defined strategies. Adaptive random testing tries to spread test cases to improve failure discovery. The current release includes a Hypothesis-targeted coverage baseline that also finds all seeded classes when the predicates are known. Current evidence is still limited to a seeded numerical corpus.
 
 ## Residual Adaptive Refinement
 

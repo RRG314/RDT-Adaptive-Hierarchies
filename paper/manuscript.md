@@ -9,7 +9,7 @@ Recursive Division Tree (RDT) began as an integer-depth construction for measuri
 
 The central claim is intentionally bounded. RDT is useful when recursive hierarchy metadata preserves or targets a measurable property. The strongest current mechanism is **stable ancestor-label inheritance**: when a partition cell splits during resize, one child inherits the parent label and only the new branch receives a new label. This mechanism is evaluated on synthetic point sets and California Housing coordinates using movement, locality, load imbalance, and a combined movement/locality/load score. In the current benchmark, RDT stable labels outperform Jump Hash, rendezvous hashing, Morton ordering, grid partitioning, principal-axis sorting, modulo hashing, and a remapped-label ablation on the tested resize tasks. On California Housing coordinates, RDT stable labels score `0.4386`, `0.4945`, and `0.4641` on the `16 -> 20`, `32 -> 40`, and `64 -> 80` resize tasks, respectively, compared with Jump Hash scores of `0.6583`, `0.6664`, and `0.6790`.
 
-The second supported application is **RDT-cover**, a deterministic numerical coverage schedule that targets boundaries, midpoints, powers of ten, corners, and shell-like scale transitions. In a seeded numerical edge-case benchmark, full RDT-cover and RDT+Sobol find all five predefined edge-case classes, while random uniform, Sobol, and Latin hypercube sampling find two at the tested budget. The result supports RDT-cover as a deterministic complement to random and low-discrepancy sampling, not as a replacement for property-based testing or fuzzing.
+The second supported application is **RDT-cover**, a deterministic numerical coverage schedule that targets boundaries, midpoints, powers of ten, corners, and shell-like scale transitions. In a seeded numerical edge-case benchmark, full RDT-cover, RDT+Sobol, and a Hypothesis-targeted property-based baseline find all five predefined edge-case classes, while random uniform, Sobol, and Latin hypercube sampling find fewer at the tested budget. The result supports RDT-cover as a deterministic complement to random and low-discrepancy sampling when explicit properties are not available. It does not support superiority over targeted property-based testing.
 
 The paper also reports negative and mixed evidence. RDT is not the fastest raw partitioner in timing checks. RDT residual sampling loses to greedy top-residual selection on a real California Housing residual field. Shell drift is diagnostic-only. Recursive delta preprocessing helps ramp-like synthetic byte sequences but is not a general compressor. These limitations are part of the contribution: they separate a small, reproducible framework from broader unsupported RDT claims.
 
@@ -61,7 +61,7 @@ RDT stable partitioning shares the movement objective but differs by measuring s
 
 Morton/Z-order mappings and Hilbert curves map multidimensional data into one-dimensional orderings that tend to preserve locality. Tree-based spatial indexes such as KD-trees, quadtrees, octrees, R-trees, and bounding volume hierarchies organize space hierarchically for search or geometry tasks. Geospatial systems such as H3 and S2 provide mature hierarchical cell systems over the Earth [4, 5].
 
-RDT-v1 is not promoted as a replacement for those systems. The current implementation is evaluated as a stable resize partitioner, not as a range-query or nearest-neighbor index. The missing baseline list includes Hilbert curves, H3, S2, geohash, and production-style virtual-node hashing.
+RDT-v1 is not promoted as a replacement for those systems. The current implementation is evaluated as a stable resize partitioner, not as a range-query or nearest-neighbor index. The release-hardening benchmark includes Hilbert curves, H3, S2, geohash, and virtual-node hashing, but still needs larger real workloads and production-style tuning.
 
 ### 3.3 Numerical Coverage and Testing
 
@@ -156,7 +156,7 @@ The current stable partition benchmark compares RDT stable labels with:
 - grid partitioning,
 - remapped-label RDT.
 
-The baseline set is not complete. Hilbert, H3, S2, geohash, virtual-node hashing, memory scaling, and production workloads remain required before stronger claims.
+The release-hardening baseline set includes Hilbert, H3, S2, geohash, and virtual-node hashing. Memory RSS profiling, larger real workloads, production workloads, and parameter sensitivity remain required before stronger claims.
 
 ### 5.4 RDT-Cover
 
@@ -226,7 +226,8 @@ Compared methods are:
 - boundaries-only,
 - random uniform,
 - Sobol,
-- Latin hypercube.
+- Latin hypercube,
+- Hypothesis-targeted coverage.
 
 The main metric is the number of edge-case classes found at fixed budget.
 
@@ -298,18 +299,16 @@ At the tested budget:
 
 | Method | Mean bug classes found | Mean total hits | Mean centered discrepancy |
 |---|---:|---:|---:|
-| RDT full | 5.00 | 75.20 | 0.11446 |
-| RDT+Sobol | 5.00 | 70.20 | 0.02822 |
-| Powers-only | 4.00 | 89.40 | 0.00108 |
-| Midpoints-only | 3.00 | 63.00 | 0.00066 |
-| Boundaries-only | 3.00 | 40.00 | 0.00046 |
-| Random uniform | 2.00 | 35.60 | 0.00044 |
-| Sobol | 2.00 | 34.20 | 0.00000 |
-| Latin hypercube | 2.00 | 46.60 | 0.00002 |
+| Hypothesis-targeted | 5.00 | 294.60 | 0.02021 |
+| RDT full | 5.00 | 68.40 | 0.10912 |
+| RDT+Sobol | 5.00 | 63.40 | 0.02767 |
+| Random uniform | 2.00 | 25.20 | 0.00082 |
+| Sobol | 2.00 | 23.20 | 0.00000 |
+| Latin hypercube | 1.40 | 21.80 | 0.00008 |
 
 ![RDT-cover edge-case discovery](../docs/figures/coverage_ablation.svg)
 
-Sobol has excellent discrepancy, but it misses seeded edge classes. RDT-cover spends budget on deterministic edge anchors and therefore finds more edge classes in this corpus. The hybrid keeps full discovery while improving fill quality relative to RDT-only.
+Sobol has excellent discrepancy, but it misses seeded edge classes. RDT-cover spends budget on deterministic edge anchors and therefore finds more edge classes than blind random or low-discrepancy baselines in this corpus. Hypothesis-targeted coverage also finds all five classes and produces more total hits because it searches with predicate-aware strategies. This narrows the claim: RDT-cover is useful as a property-free deterministic schedule, while Hypothesis is the stronger tool when properties are known.
 
 ### 7.4 Geometry Validation
 
@@ -374,11 +373,11 @@ The practical lesson is that future RDT work should use this sequence:
 
 ## 9. Limitations
 
-The stable partition benchmark needs stronger baselines: Hilbert curves, H3, S2, geohash, virtual-node consistent hashing, memory scaling, and larger real workloads.
+The stable partition benchmark now includes Hilbert curves, H3, S2, geohash, and virtual-node consistent hashing. It still needs memory RSS profiling, parameter sensitivity, larger real workloads, and production workloads.
 
 The combined score uses fixed development weights. Future work should report sensitivity over movement, locality, and load weights.
 
-RDT-cover is tested on a seeded synthetic corpus. This is good mechanism evidence but not real software-failure evidence. Hypothesis, fuzzers, adaptive random testing, and numerical mutant corpora are needed.
+RDT-cover is tested on a seeded synthetic corpus. This is good mechanism evidence but not real software-failure evidence. Hypothesis-targeted coverage is now included and matches bug-class discovery when predicates are known. Fuzzers, adaptive random testing, and numerical mutant corpora are still needed.
 
 The geometry validation benchmark uses selected known forms and a simple baseline. Equal-budget quadrature, Monte Carlo, quasi-Monte Carlo, and convergence curves are required before stronger numerical-method claims.
 

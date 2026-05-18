@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import hashlib
+import bisect
 from dataclasses import dataclass
 from time import perf_counter
-from typing import Callable, Dict, Tuple
+from typing import Callable, Dict, Iterable, Tuple
 
 import numpy as np
 
@@ -43,6 +44,38 @@ def rendezvous_hash(key: int, buckets: int) -> int:
 
 def modulo_hash(key: int, buckets: int) -> int:
     return int(key) % int(buckets)
+
+
+def virtual_node_consistent_hash_labels(keys: Iterable[int], buckets: int, virtual_nodes: int = 64) -> np.ndarray:
+    """Assign keys by consistent hashing with virtual nodes.
+
+    This is a standard movement-oriented baseline. It should be strong on
+    reassignment stability and weak on spatial locality because it ignores the
+    coordinates.
+    """
+
+    if buckets < 1:
+        raise ValueError("buckets must be >= 1")
+    if virtual_nodes < 1:
+        raise ValueError("virtual_nodes must be >= 1")
+    ring: list[tuple[int, int]] = []
+    for bucket in range(int(buckets)):
+        for vnode in range(int(virtual_nodes)):
+            payload = f"{bucket}:{vnode}".encode("ascii")
+            digest = hashlib.blake2b(payload, digest_size=8).digest()
+            ring.append((int.from_bytes(digest, "little", signed=False), bucket))
+    ring.sort(key=lambda item: item[0])
+    positions = [item[0] for item in ring]
+    labels = []
+    for key in keys:
+        key_bytes = int(key).to_bytes(8, "little", signed=False)
+        digest = hashlib.blake2b(key_bytes, digest_size=8).digest()
+        pos = int.from_bytes(digest, "little", signed=False)
+        idx = bisect.bisect_left(positions, pos)
+        if idx == len(ring):
+            idx = 0
+        labels.append(ring[idx][1])
+    return np.asarray(labels, dtype=np.int64)
 
 
 def grid_partition(points: np.ndarray, buckets: int) -> np.ndarray:
@@ -88,6 +121,49 @@ def morton_sort_partition(points: np.ndarray, buckets: int) -> np.ndarray:
     return np.minimum(labels, buckets - 1)
 
 
+def _xy_to_hilbert_index(x: int, y: int, bits: int = 16) -> int:
+    """Return a 2D Hilbert index for integer coordinates.
+
+    The implementation follows the standard iterative xy-to-d transform for a
+    square grid of side ``2**bits``.
+    """
+
+    n = 1 << bits
+    d = 0
+    s = n >> 1
+    while s > 0:
+        rx = 1 if (x & s) else 0
+        ry = 1 if (y & s) else 0
+        d += s * s * ((3 * rx) ^ ry)
+        if ry == 0:
+            if rx == 1:
+                x = n - 1 - x
+                y = n - 1 - y
+            x, y = y, x
+        s >>= 1
+    return int(d)
+
+
+def hilbert_codes(points: np.ndarray, bits: int = 16) -> np.ndarray:
+    """Compute 2D Hilbert order codes for the first two point dimensions."""
+
+    x = np.asarray(points, dtype=float)
+    if x.shape[1] < 2:
+        x = np.column_stack([x[:, 0], np.zeros(x.shape[0])])
+    mins = np.min(x[:, :2], axis=0)
+    span = np.maximum(np.ptp(x[:, :2], axis=0), 1e-12)
+    norm = np.clip((x[:, :2] - mins) / span, 0, 0.999999)
+    max_coord = (1 << bits) - 1
+    quant = np.floor(norm * max_coord).astype(np.int64)
+    return np.asarray([_xy_to_hilbert_index(int(px), int(py), bits=bits) for px, py in quant], dtype=object)
+
+
+def hilbert_sort_partition(points: np.ndarray, buckets: int) -> np.ndarray:
+    """Locality baseline using contiguous chunks along Hilbert order."""
+
+    return _order_chunk_partition(hilbert_codes(points), buckets)
+
+
 def principal_sort_partition(points: np.ndarray, buckets: int) -> np.ndarray:
     """Locality baseline using first principal direction and equal-size chunks."""
 
@@ -102,6 +178,83 @@ def principal_sort_partition(points: np.ndarray, buckets: int) -> np.ndarray:
     ranks[order] = np.arange(len(order))
     labels = np.floor(ranks * buckets / max(1, len(order))).astype(np.int64)
     return np.minimum(labels, buckets - 1)
+
+
+def _order_chunk_partition(codes: np.ndarray, buckets: int) -> np.ndarray:
+    order = np.argsort(codes, kind="mergesort")
+    ranks = np.empty(len(order), dtype=np.int64)
+    ranks[order] = np.arange(len(order))
+    labels = np.floor(ranks * buckets / max(1, len(order))).astype(np.int64)
+    return np.minimum(labels, buckets - 1)
+
+
+def _points_to_lat_lon(points: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Map arbitrary 2D points into valid latitude/longitude ranges.
+
+    The geospatial baselines are included as mature hierarchical-cell
+    comparisons. Synthetic datasets are normalized into geographic coordinate
+    ranges so these baselines can be exercised without requiring real lat/lon
+    input.
+    """
+
+    x = np.asarray(points, dtype=float)
+    if x.shape[1] < 2:
+        x = np.column_stack([x[:, 0], np.zeros(x.shape[0])])
+    mins = np.min(x[:, :2], axis=0)
+    span = np.maximum(np.ptp(x[:, :2], axis=0), 1e-12)
+    norm = np.clip((x[:, :2] - mins) / span, 0, 1)
+    lat = -85.0 + norm[:, 1] * 170.0
+    lon = -180.0 + norm[:, 0] * 360.0
+    return lat, lon
+
+
+def h3_sort_partition(points: np.ndarray, buckets: int, resolution: int = 5) -> np.ndarray:
+    """H3 hierarchical-cell ordering baseline.
+
+    Requires the optional ``h3`` package. The partition sorts points by H3 cell
+    id and then forms equal-size chunks.
+    """
+
+    try:
+        import h3  # type: ignore
+    except ImportError as exc:  # pragma: no cover - exercised when optional dep absent
+        raise ImportError("h3_sort_partition requires the optional h3 package") from exc
+    lat, lon = _points_to_lat_lon(points)
+    codes = np.asarray([h3.latlng_to_cell(float(a), float(o), resolution) for a, o in zip(lat, lon)], dtype=object)
+    return _order_chunk_partition(codes, buckets)
+
+
+def s2_sort_partition(points: np.ndarray, buckets: int, level: int = 10) -> np.ndarray:
+    """S2 hierarchical-cell ordering baseline.
+
+    Requires the optional ``s2sphere`` package.
+    """
+
+    try:
+        from s2sphere import CellId, LatLng  # type: ignore
+    except ImportError as exc:  # pragma: no cover
+        raise ImportError("s2_sort_partition requires the optional s2sphere package") from exc
+    lat, lon = _points_to_lat_lon(points)
+    codes = np.asarray([
+        int(CellId.from_lat_lng(LatLng.from_degrees(float(a), float(o))).parent(level).id())
+        for a, o in zip(lat, lon)
+    ], dtype=object)
+    return _order_chunk_partition(codes, buckets)
+
+
+def geohash_sort_partition(points: np.ndarray, buckets: int, precision: int = 5) -> np.ndarray:
+    """Geohash ordering baseline.
+
+    Requires the optional ``pygeohash`` package.
+    """
+
+    try:
+        import pygeohash  # type: ignore
+    except ImportError as exc:  # pragma: no cover
+        raise ImportError("geohash_sort_partition requires the optional pygeohash package") from exc
+    lat, lon = _points_to_lat_lon(points)
+    codes = np.asarray([pygeohash.encode(float(a), float(o), precision=precision) for a, o in zip(lat, lon)], dtype=object)
+    return _order_chunk_partition(codes, buckets)
 
 
 @dataclass
@@ -188,6 +341,15 @@ def benchmark_partition_methods(points: np.ndarray, dataset: str, k1: int = 16, 
         )
 
     start = perf_counter()
+    labels1 = virtual_node_consistent_hash_labels(keys, k1)
+    labels2 = virtual_node_consistent_hash_labels(keys, k2)
+    assign = perf_counter() - start
+    results["virtual_node_hash"] = PartitionBenchmarkResult(
+        "virtual_node_hash", dataset, len(x), k1, k2, movement_fraction(labels1, labels2),
+        load_imbalance(labels2), locality_dispersion(x, labels2), 0.0, assign,
+    )
+
+    start = perf_counter()
     labels1 = grid_partition(x, k1)
     labels2 = grid_partition(x, k2)
     assign = perf_counter() - start
@@ -198,12 +360,30 @@ def benchmark_partition_methods(points: np.ndarray, dataset: str, k1: int = 16, 
 
     for name, func in {
         "morton_sort": morton_sort_partition,
+        "hilbert_sort": hilbert_sort_partition,
         "principal_sort": principal_sort_partition,
     }.items():
         start = perf_counter()
         labels1 = func(x, k1)
         labels2 = func(x, k2)
         assign = perf_counter() - start
+        results[name] = PartitionBenchmarkResult(
+            name, dataset, len(x), k1, k2, movement_fraction(labels1, labels2),
+            load_imbalance(labels2), locality_dispersion(x, labels2), 0.0, assign,
+        )
+
+    for name, func in {
+        "h3_sort": h3_sort_partition,
+        "s2_sort": s2_sort_partition,
+        "geohash_sort": geohash_sort_partition,
+    }.items():
+        try:
+            start = perf_counter()
+            labels1 = func(x, k1)
+            labels2 = func(x, k2)
+            assign = perf_counter() - start
+        except ImportError:
+            continue
         results[name] = PartitionBenchmarkResult(
             name, dataset, len(x), k1, k2, movement_fraction(labels1, labels2),
             load_imbalance(labels2), locality_dispersion(x, labels2), 0.0, assign,

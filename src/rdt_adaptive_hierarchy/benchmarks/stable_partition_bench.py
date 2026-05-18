@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import tracemalloc
 from dataclasses import asdict
 from pathlib import Path
 from typing import Dict, List
@@ -35,6 +36,7 @@ def run(output_dir: Path, seeds: int = 3, n: int = 5_000) -> Dict[str, object]:
 
     output_dir.mkdir(parents=True, exist_ok=True)
     rows: List[dict] = []
+    tracemalloc.start()
     for seed in range(seeds):
         for dataset in ["uniform", "clustered", "diagonal"]:
             points = make_spatial_dataset(dataset, n=n, seed=seed)
@@ -43,9 +45,12 @@ def run(output_dir: Path, seeds: int = 3, n: int = 5_000) -> Dict[str, object]:
                 row["combined_score_lower_is_better"] = (
                     row["movement"] + 0.45 * row["locality_k2"] + 0.20 * max(0.0, row["imbalance_k2"] - 1.0)
                 )
+                row["python_peak_memory_kib"] = float(tracemalloc.get_traced_memory()[1] / 1024.0)
                 rows.append(row)
+    peak_kib = float(tracemalloc.get_traced_memory()[1] / 1024.0)
+    tracemalloc.stop()
     summary = _summarize(rows)
-    result = {"benchmark": "stable_partition", "rows": rows, "summary": summary}
+    result = {"benchmark": "stable_partition", "rows": rows, "summary": summary, "peak_memory_kib": peak_kib}
     (output_dir / "stable_partition_results.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
     _write_csv(output_dir / "stable_partition_summary.csv", rows)
     (output_dir / "STABLE_PARTITION_RESULT_CARD.md").write_text(_render_markdown(summary), encoding="utf-8")
@@ -59,16 +64,31 @@ def _summarize(rows: List[dict]) -> List[dict]:
             group = [row for row in rows if row["dataset"] == dataset and row["method"] == method]
             if not group:
                 continue
+            scores = [row["combined_score_lower_is_better"] for row in group]
+            movements = [row["movement"] for row in group]
+            localities = [row["locality_k2"] for row in group]
+            imbalances = [row["imbalance_k2"] for row in group]
             out.append({
                 "dataset": dataset,
                 "method": method,
                 "runs": len(group),
-                "movement_mean": float(np.mean([row["movement"] for row in group])),
-                "locality_mean": float(np.mean([row["locality_k2"] for row in group])),
-                "imbalance_mean": float(np.mean([row["imbalance_k2"] for row in group])),
-                "combined_score_mean": float(np.mean([row["combined_score_lower_is_better"] for row in group])),
+                "movement_mean": float(np.mean(movements)),
+                "movement_ci95": _ci95(movements),
+                "locality_mean": float(np.mean(localities)),
+                "locality_ci95": _ci95(localities),
+                "imbalance_mean": float(np.mean(imbalances)),
+                "imbalance_ci95": _ci95(imbalances),
+                "combined_score_mean": float(np.mean(scores)),
+                "combined_score_ci95": _ci95(scores),
+                "python_peak_memory_kib_max": float(max(row.get("python_peak_memory_kib", 0.0) for row in group)),
             })
     return out
+
+
+def _ci95(values: List[float]) -> float:
+    if len(values) <= 1:
+        return 0.0
+    return float(1.96 * np.std(values, ddof=1) / np.sqrt(len(values)))
 
 
 def _write_csv(path: Path, rows: List[dict]) -> None:
@@ -85,8 +105,8 @@ def _render_markdown(summary: List[dict]) -> str:
         "",
         "Lower combined score is better. The score is movement + 0.45 * locality + 0.20 * load penalty.",
         "",
-        "| Dataset | Best method | RDT score | Jump score | Morton score |",
-        "|---|---|---:|---:|---:|",
+        "| Dataset | Best method | RDT score ±95% CI | Jump score ±95% CI | Morton score ±95% CI | Peak Python memory KiB |",
+        "|---|---|---:|---:|---:|---:|",
     ]
     for dataset in sorted({row["dataset"] for row in summary}):
         group = [row for row in summary if row["dataset"] == dataset]
@@ -95,8 +115,10 @@ def _render_markdown(summary: List[dict]) -> str:
         jump = next(row for row in group if row["method"] == "jump_hash")
         morton = next(row for row in group if row["method"] == "morton_sort")
         lines.append(
-            f"| {dataset} | `{best['method']}` | {rdt['combined_score_mean']:.4f} | "
-            f"{jump['combined_score_mean']:.4f} | {morton['combined_score_mean']:.4f} |"
+            f"| {dataset} | `{best['method']}` | {rdt['combined_score_mean']:.4f} ± {rdt['combined_score_ci95']:.4f} | "
+            f"{jump['combined_score_mean']:.4f} ± {jump['combined_score_ci95']:.4f} | "
+            f"{morton['combined_score_mean']:.4f} ± {morton['combined_score_ci95']:.4f} | "
+            f"{max(row['python_peak_memory_kib_max'] for row in group):.0f} |"
         )
     return "\n".join(lines) + "\n"
 

@@ -8,8 +8,8 @@ The stored runs were produced on 2026-05-18. Repeated synthetic benchmarks use s
 
 | Area | Best current readout | Status |
 |---|---|---|
-| Stable partitioning | RDT stable labels win the tested movement/locality/load score on synthetic and California Housing resize tasks. | Strongest current result. Needs Hilbert/H3/S2/geohash and larger workload comparisons. |
-| RDT-cover | Full and hybrid RDT-cover find all 5 seeded numerical edge-case classes. Random, Sobol, and Latin hypercube find 2. | Strong controlled result. Needs Hypothesis and real bug corpora. |
+| Stable partitioning | RDT stable labels win the tested movement/locality/load score on synthetic and California Housing resize tasks. Release-hardening baselines now include Hilbert, H3, S2, geohash, and virtual-node consistent hashing. | Strongest current result. Needs larger real workloads and memory/RSS profiling beyond `tracemalloc`. |
+| RDT-cover | Full RDT-cover, RDT+Sobol, and Hypothesis-targeted coverage find all 5 seeded numerical edge-case classes. Random, Sobol, and Latin hypercube find fewer. | Strong controlled result, but Hypothesis is now a serious predicate-aware baseline. Needs real bug corpora. |
 | Geometry validation | RDT recursive-depth schedule gives max relative error `0.0003674` on selected known-form checks. Coarse midpoint baseline gives `0.0004025`. | Bounded numerical result. Needs equal-budget quadrature and QMC. |
 | Residual sampling | RDT tuned helps two synthetic fields but loses on oscillatory and real California residuals. | Mixed. Research-only. |
 | Shell drift | Some synthetic detection, but simple baselines remain competitive. | Diagnostic-only. |
@@ -60,6 +60,22 @@ Representative scores:
 
 This supports the mechanism claim: stable ancestor-label inheritance is doing useful work. The result does not prove general superiority over all spatial partitioning systems.
 
+### Release-Hardening Baselines
+
+The release-hardening run adds Hilbert ordering, H3 ordering, S2 ordering, geohash ordering, and virtual-node consistent hashing. It uses 5 seeds, `n = 5,000`, and reports 95% confidence intervals over seeds. The peak memory value is Python `tracemalloc` peak memory for the run.
+
+| Dataset | RDT stable | Rendezvous | Jump Hash | Virtual-node hash | Best added spatial baseline | Peak Python memory |
+|---|---:|---:|---:|---:|---:|---:|
+| Uniform | 0.2005 ± 0.0003 | 0.6622 ± 0.0003 | 0.6757 ± 0.0001 | 0.7346 ± 0.0004 | Hilbert 0.9050 ± 0.0003 | 26,942 KiB |
+| Clustered | 0.2739 ± 0.0202 | 0.6628 ± 0.0002 | 0.6760 ± 0.0002 | 0.7347 ± 0.0002 | Morton 0.9012 ± 0.0014 | 26,946 KiB |
+| Diagonal | 0.1784 ± 0.0002 | 0.6627 ± 0.0004 | 0.6758 ± 0.0001 | 0.7346 ± 0.0004 | Principal sort 0.8771 ± 0.0000 | 26,957 KiB |
+
+Artifact paths:
+
+- `raw/release_hardening_2026-05-18/stable_partition/stable_partition_results.json`
+- `raw/release_hardening_2026-05-18/stable_partition/stable_partition_summary.csv`
+- `raw/release_hardening_2026-05-18/stable_partition/STABLE_PARTITION_RESULT_CARD.md`
+
 ## RDT-Cover
 
 RDT-cover generates deterministic test inputs around boundaries, midpoints, powers of ten, corners, and shell-like scale changes. The benchmark counts predeclared seeded numerical edge-case classes:
@@ -74,18 +90,18 @@ At the tested budget:
 
 | Method | Mean bug classes found | Mean total hits | Mean centered discrepancy |
 |---|---:|---:|---:|
-| RDT full | 5.00 | 75.20 | 0.11446 |
-| RDT+Sobol | 5.00 | 70.20 | 0.02822 |
-| Powers-only | 4.00 | 89.40 | 0.00108 |
-| Midpoints-only | 3.00 | 63.00 | 0.00066 |
-| Boundaries-only | 3.00 | 40.00 | 0.00046 |
-| Random uniform | 2.00 | 35.60 | 0.00044 |
-| Sobol | 2.00 | 34.20 | 0.00000 |
-| Latin hypercube | 2.00 | 46.60 | 0.00002 |
+| Hypothesis-targeted | 5.00 ± 0.00 | 294.60 ± 1.00 | 0.02021 ± 0.00153 |
+| RDT full | 5.00 ± 0.00 | 68.40 ± 3.37 | 0.10912 ± 0.00170 |
+| RDT+Sobol | 5.00 ± 0.00 | 63.40 ± 3.75 | 0.02767 ± 0.00126 |
+| Random uniform | 2.00 ± 0.00 | 25.20 ± 1.90 | 0.00082 ± 0.00046 |
+| Sobol | 2.00 ± 0.00 | 23.20 ± 0.96 | 0.00000 ± 0.00000 |
+| Latin hypercube | 1.40 ± 0.48 | 21.80 ± 1.44 | 0.00008 ± 0.00003 |
 
 ![RDT-cover edge-case discovery](../docs/figures/coverage_ablation.svg)
 
-Interpretation: the deterministic edge anchors explain the win. Powers, midpoints, and boundaries each find part of the seeded failure set. The hybrid keeps full bug-class discovery while improving fill quality relative to RDT-only.
+Interpretation: deterministic edge anchors explain the RDT-cover win over blind random and low-discrepancy baselines. Hypothesis-targeted coverage is now an important stronger baseline: when the properties are known, it also finds every seeded class and produces many more total hits. RDT-cover remains useful as a deterministic property-free schedule; it is not superior to targeted property-based testing in this benchmark.
+
+Peak Python memory for the release-hardening cover run was about `61,799 KiB`.
 
 Limitation: this is still a synthetic seeded corpus. It is good mechanism evidence but not a substitute for Hypothesis strategies, fuzzers, adaptive random testing, or real bug corpora.
 
@@ -152,5 +168,7 @@ The raw files are kept so the summary can be audited:
 - `raw/artifact_performance_5seed_2026-05-18/artifact_check_results.json`
 - `raw/real_public_data_2026-05-18/real_public_data_results.json`
 - `raw/geometry_validation_2026-05-18/geometry_results.json`
+- `raw/release_hardening_2026-05-18/stable_partition/stable_partition_results.json`
+- `raw/release_hardening_2026-05-18/cover/cover_results.json`
 
 Rerun commands are documented in `docs/reproducibility.md`.

@@ -62,14 +62,20 @@ Stable partition baselines currently include:
 - grid partitioning,
 - remapped-label RDT ablation.
 
-Missing baselines before submission:
+Implemented release-hardening baselines:
 
 - virtual-node consistent hashing,
 - Hilbert ordering,
 - H3,
 - S2,
-- geohash,
-- workload-specific production partitioners.
+- geohash.
+
+Missing before submission:
+
+- workload-specific production partitioners,
+- larger real geospatial workloads,
+- memory RSS profiling,
+- parameter sensitivity for virtual-node counts and geospatial levels.
 
 ## RDT-Cover Method
 

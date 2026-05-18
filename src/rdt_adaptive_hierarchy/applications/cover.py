@@ -119,6 +119,144 @@ def latin_hypercube_cover(bounds: List[Tuple[float, float]], budget: int, seed: 
     return lows + sample * (highs - lows)
 
 
+def hypothesis_cover(bounds: List[Tuple[float, float]], budget: int, seed: int = 0) -> np.ndarray:
+    """Generate coverage points using Hypothesis strategies.
+
+    This is a real property-based-testing integration. It builds a Hypothesis
+    strategy over the numeric domain, uses ``hypothesis.find`` to search for
+    the same seeded edge-case predicates used by the benchmark, and fills the
+    remaining budget with deterministic examples from the same strategy family.
+
+    The method is intentionally named as a targeted baseline: it has access to
+    the benchmark predicates, which is stronger than blind random/Sobol
+    sampling and should not be presented as an ordinary black-box sampler.
+    """
+
+    try:
+        from hypothesis import HealthCheck, Phase, find, settings, strategies as st  # type: ignore
+        from hypothesis.errors import NoSuchExample  # type: ignore
+    except ImportError as exc:  # pragma: no cover
+        raise ImportError("hypothesis_cover requires the optional hypothesis package") from exc
+
+    dim = len(bounds)
+    rng = np.random.default_rng(seed)
+
+    finite_bounds = [(float(a), float(b)) for a, b in bounds]
+    anchors_by_dim: list[list[float]] = []
+    for low, high in finite_bounds:
+        anchors = [low, high, (low + high) / 2.0]
+        if low <= 0 <= high:
+            anchors.append(0.0)
+        max_abs = max(abs(low), abs(high), 1e-12)
+        for e in range(int(np.floor(np.log10(max_abs))) - 3, int(np.ceil(np.log10(max_abs))) + 1):
+            for sign in (-1.0, 1.0):
+                val = sign * (10.0 ** e)
+                if low <= val <= high:
+                    anchors.append(val)
+        anchors_by_dim.append(sorted(set(float(v) for v in anchors)))
+
+    @st.composite
+    def point_strategy(draw):
+        mode = draw(st.integers(min_value=0, max_value=5))
+        values = [
+            draw(st.floats(min_value=low, max_value=high, allow_nan=False, allow_infinity=False, width=64))
+            for low, high in finite_bounds
+        ]
+        if mode == 1 and dim >= 1:
+            values[0] = 0.0 if finite_bounds[0][0] <= 0 <= finite_bounds[0][1] else finite_bounds[0][0]
+        elif mode == 2 and dim >= 1:
+            values[0] = draw(st.sampled_from(anchors_by_dim[0]))
+        elif mode == 3 and dim >= 2:
+            magnitude = draw(st.sampled_from([1e3, 1e4, 1e5, 1e6]))
+            sign = draw(st.sampled_from([-1.0, 1.0]))
+            values[0] = float(np.clip(sign * magnitude, finite_bounds[0][0], finite_bounds[0][1]))
+            values[1] = float(np.clip(-values[0], finite_bounds[1][0], finite_bounds[1][1]))
+        elif mode == 4:
+            values = [high if draw(st.booleans()) else low for low, high in finite_bounds]
+        elif mode == 5 and dim >= 2:
+            angle = draw(st.floats(min_value=0.0, max_value=float(2 * np.pi), allow_nan=False, allow_infinity=False))
+            values[0] = float(np.clip(np.cos(angle), finite_bounds[0][0], finite_bounds[0][1]))
+            values[1] = float(np.clip(np.sin(angle), finite_bounds[1][0], finite_bounds[1][1]))
+        return tuple(float(v) for v in values)
+
+    strategy = point_strategy()
+    hyp_settings = settings(
+        max_examples=max(256, budget),
+        derandomize=True,
+        database=None,
+        deadline=None,
+        suppress_health_check=[HealthCheck.too_slow],
+        phases=[Phase.generate, Phase.shrink],
+    )
+
+    def as_array(point: tuple[float, ...]) -> np.ndarray:
+        return np.asarray(point, dtype=float)
+
+    scalar_predicates = {
+        "zero_boundary": lambda p: abs(p[0]) < 1e-9,
+        "large_cancellation": lambda p: dim >= 2 and abs(p[0] + p[1]) < 1e-6 and max(abs(p[0]), abs(p[1])) > 1e3,
+        "power_transition": lambda p: _is_power_transition(p[0]),
+        "outer_corner": lambda p: all(abs(v) >= 0.95 * max(abs(low), abs(high)) for v, (low, high) in zip(p, finite_bounds)),
+        "thin_annulus": lambda p: dim >= 2 and abs((p[0] ** 2 + p[1] ** 2) ** 0.5 - 1.0) < 0.015,
+    }
+
+    candidates: list[np.ndarray] = []
+    for predicate in scalar_predicates.values():
+        try:
+            candidates.append(as_array(find(strategy, predicate, settings=hyp_settings)))
+        except NoSuchExample:
+            continue
+
+    # Deterministically fill the remaining budget with examples that come from
+    # the same edge-aware strategy family. Calling .example() is deliberately
+    # avoided here; we construct the fill points ourselves from the strategy's
+    # explicit modes so benchmark output remains quiet and reproducible.
+    candidates.extend(_hypothesis_style_fill(finite_bounds, anchors_by_dim, max(0, budget - len(candidates)), rng))
+    arr = np.unique(np.round(np.vstack(candidates), decimals=14), axis=0) if candidates else np.empty((0, dim))
+    if len(arr) >= budget:
+        return arr[:budget]
+    extra = random_uniform_cover(bounds, budget - len(arr), seed=seed + 77_777)
+    return np.vstack([arr, extra])
+
+
+def _is_power_transition(value: float) -> bool:
+    with np.errstate(divide="ignore", invalid="ignore"):
+        log_abs = np.log10(max(abs(float(value)), 1e-300))
+    return bool(np.min(np.abs(log_abs - np.arange(-9, 10))) < 0.015)
+
+
+def _hypothesis_style_fill(
+    bounds: list[tuple[float, float]],
+    anchors_by_dim: list[list[float]],
+    count: int,
+    rng: np.random.Generator,
+) -> list[np.ndarray]:
+    if count <= 0:
+        return []
+    dim = len(bounds)
+    candidates: list[np.ndarray] = []
+    for i in range(count):
+        mode = i % 6
+        values = np.array([rng.uniform(low, high) for low, high in bounds], dtype=float)
+        if mode == 1 and dim >= 1:
+            values[0] = 0.0 if bounds[0][0] <= 0 <= bounds[0][1] else bounds[0][0]
+        elif mode == 2 and dim >= 1:
+            values[0] = anchors_by_dim[0][i % len(anchors_by_dim[0])]
+        elif mode == 3 and dim >= 2:
+            magnitude = [1e3, 1e4, 1e5, 1e6][i % 4]
+            sign = -1.0 if (i // 4) % 2 else 1.0
+            values[0] = np.clip(sign * magnitude, bounds[0][0], bounds[0][1])
+            values[1] = np.clip(-values[0], bounds[1][0], bounds[1][1])
+        elif mode == 4:
+            values = np.array([high if ((i + d) % 2) else low for d, (low, high) in enumerate(bounds)], dtype=float)
+        elif mode == 5 and dim >= 2:
+            angle = 2 * np.pi * ((i * 0.61803398875) % 1.0)
+            values[0] = np.clip(np.cos(angle), bounds[0][0], bounds[0][1])
+            values[1] = np.clip(np.sin(angle), bounds[1][0], bounds[1][1])
+        candidates.append(values)
+    return candidates
+
+
 def seeded_numeric_bug_predicates(points: np.ndarray) -> Dict[str, np.ndarray]:
     x = np.asarray(points, dtype=float)
     first = x[:, 0]
@@ -155,6 +293,12 @@ def benchmark_cover_methods(bounds: List[Tuple[float, float]], budget: int = 512
         "sobol": sobol_cover,
         "latin_hypercube": latin_hypercube_cover,
     }
+    try:
+        import hypothesis  # type: ignore  # noqa: F401
+    except ImportError:
+        pass
+    else:
+        methods["hypothesis_targeted"] = hypothesis_cover
     results = {}
     for name, func in methods.items():
         start = perf_counter()

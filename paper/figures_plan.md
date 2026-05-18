@@ -40,7 +40,7 @@ Purpose: show RDT-cover as the second supported application.
 
 Caption draft:
 
-Mean seeded numerical edge-case classes found at fixed budget. Full and hybrid RDT schedules found all five classes, while random and Sobol found two. The benchmark is synthetic and should be followed by real bug-corpus tests.
+Mean seeded numerical edge-case classes found at fixed budget. Full RDT, hybrid RDT, and Hypothesis-targeted coverage found all five classes, while random, Sobol, and Latin hypercube found fewer. The benchmark is synthetic and should be followed by real bug-corpus tests.
 
 ## Figure 5: Residual Sampler Failure Case
 
@@ -77,5 +77,5 @@ Machine-local timing on 50k synthetic uniform points. RDT is not the fastest raw
 - Confidence interval or seed-distribution plots for stable partition scores.
 - Runtime and memory scaling across multiple `n`.
 - Coverage time-to-first-failure curves.
-- Hypothesis or adaptive-random-testing comparison once implemented.
+- Adaptive-random-testing comparison and real bug-corpus evaluation.
 - A schematic comparing RDT stable partitioning with Jump Hash and Morton behavior under resize.

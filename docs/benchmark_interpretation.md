@@ -28,9 +28,13 @@ Why this is not a speed claim:
 
 Grid and Morton methods are faster in raw timing checks. The present claim is about a score that includes movement, locality, and load, not throughput dominance.
 
+Release-hardening update:
+
+Hilbert, H3, S2, geohash, and virtual-node consistent hashing are now implemented. On the 5-seed synthetic release-hardening run, RDT stable labels remained best on the tested uniform, clustered, and diagonal datasets. Peak Python benchmark memory was about `26,957 KiB`. This improves baseline coverage, but it does not replace larger real workload tests.
+
 What would weaken the claim:
 
-- Hilbert, H3, S2, geohash, or virtual-node hashing matches the score.
+- Larger real workloads or tuned production baselines match the score.
 - RDT fails on larger or more realistic workloads.
 - The combined-score weights are changed and the advantage disappears.
 
@@ -67,17 +71,20 @@ Yes, in the current seeded benchmark.
 
 | Method | Mean bug classes found | Mean total hits |
 |---|---:|---:|
-| RDT full | 5.00 | 75.20 |
-| RDT+Sobol | 5.00 | 70.20 |
-| Powers-only | 4.00 | 89.40 |
-| Midpoints-only | 3.00 | 63.00 |
-| Boundaries-only | 3.00 | 40.00 |
-| Random uniform | 2.00 | 35.60 |
-| Sobol | 2.00 | 34.20 |
+| Hypothesis-targeted | 5.00 | 294.60 |
+| RDT full | 5.00 | 68.40 |
+| RDT+Sobol | 5.00 | 63.40 |
+| Random uniform | 2.00 | 25.20 |
+| Sobol | 2.00 | 23.20 |
+| Latin hypercube | 1.40 | 21.80 |
 
 Why the result matters:
 
 The component ablation shows that powers, midpoints, and boundaries each explain part of the win. The full schedule is not just a random cloud with a new name.
+
+What changed after Hypothesis integration:
+
+The Hypothesis-targeted baseline also finds all five seeded edge classes. It uses predicate-aware strategies, so it is a much stronger baseline than random, Sobol, or Latin hypercube. RDT-cover should now be described as a deterministic edge schedule that is competitive on the seeded corpus and useful when properties are not yet formalized, not as a replacement for property-based testing.
 
 What this does not support:
 

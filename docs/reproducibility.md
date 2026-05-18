@@ -10,6 +10,12 @@ python -m venv .venv
 python -m pip install -e ".[test,data]"
 ```
 
+For release checks with optional baselines and package build tooling:
+
+```bash
+python -m pip install -e ".[dev]"
+```
+
 The last benchmark run used:
 
 - Python `3.14.3`
@@ -43,6 +49,19 @@ PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.cover_bench --output-
 PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.residual_sampler_bench --output-dir results/tmp/residual_sampler --seeds 2 --n-side 48
 PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.geometry_bench --output-dir results/tmp/geometry
 ```
+
+The stable partition smoke run includes Hilbert and virtual-node consistent hashing by default. If optional packages are installed, it also includes H3, S2, and geohash. The cover benchmark includes Hypothesis-targeted coverage when `hypothesis` is installed.
+
+## Release-Hardening Snapshot
+
+The latest release-hardening artifacts were generated with:
+
+```bash
+PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.stable_partition_bench --seeds 5 --n 5000 --output-dir results/raw/release_hardening_2026-05-18/stable_partition
+PYTHONPATH=src python -m rdt_adaptive_hierarchy.benchmarks.cover_bench --seeds 5 --budget 512 --output-dir results/raw/release_hardening_2026-05-18/cover
+```
+
+These runs report 95% confidence intervals and Python `tracemalloc` peak memory. The memory value is process-level Python allocation tracking, not full resident-set-size profiling.
 
 ## Datasets
 

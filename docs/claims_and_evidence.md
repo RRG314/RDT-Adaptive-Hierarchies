@@ -6,7 +6,7 @@ This project keeps claims only when they have definitions, benchmark evidence, b
 
 Claim: stable ancestor-label inheritance improves the movement/locality/load tradeoff in the tested resize tasks.
 
-Evidence: in the 5-seed benchmark, RDT stable labels had the best combined score on clustered, diagonal, hotspot-tail, and uniform synthetic datasets. On California Housing coordinates, RDT stable labels had the best combined score for 16->20, 32->40, and 64->80 resize tasks.
+Evidence: in the 5-seed benchmark, RDT stable labels had the best combined score on clustered, diagonal, hotspot-tail, and uniform synthetic datasets. On California Housing coordinates, RDT stable labels had the best combined score for 16->20, 32->40, and 64->80 resize tasks. The release-hardening run adds Hilbert, H3, S2, geohash, and virtual-node consistent hashing; RDT stable labels remain best on the tested synthetic datasets.
 
 Ablation: stable labels beat remapped labels on every tested partition task. California 16->20 scored `0.4386` for stable labels, `1.2198` for remapped labels, and `0.6583` for Jump Hash.
 
@@ -20,13 +20,13 @@ Forbidden wording: RDT is generally better than consistent hashing, H3, S2, KDTr
 
 Claim: RDT-cover improves seeded numerical edge-case discovery in the current test corpus.
 
-Evidence: RDT full and RDT+Sobol found all 5 seeded bug classes. Random, Sobol, and Latin hypercube found 2.
+Evidence: RDT full, RDT+Sobol, and Hypothesis-targeted coverage found all 5 seeded bug classes. Random, Sobol, and Latin hypercube found fewer in the release-hardening run.
 
 Ablation: powers-only found 4 classes; midpoint-only and boundary-only found 3. The full schedule matters.
 
-Failure condition: the claim weakens if Hypothesis, adaptive random testing, or a real numerical bug corpus finds the same failures faster at equal budget.
+Failure condition: the claim weakens if adaptive random testing or a real numerical bug corpus finds the same failures faster at equal budget. The Hypothesis-targeted baseline already matches bug-class discovery on the seeded corpus when the predicates are known.
 
-Allowed wording: RDT-cover is useful as a deterministic complement to random and low-discrepancy sampling.
+Allowed wording: RDT-cover is useful as a deterministic complement to random and low-discrepancy sampling when explicit properties are not yet available.
 
 Forbidden wording: RDT-cover is generally better than property-based testing or fuzzing.
 
@@ -77,4 +77,3 @@ Failure condition: the claim weakens if equal-budget quadrature, Monte Carlo, or
 Allowed wording: the geometry helper is a bounded numerical validation object.
 
 Forbidden wording: RDT proves a new geometry theory.
-

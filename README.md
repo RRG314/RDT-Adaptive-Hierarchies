@@ -1,5 +1,7 @@
 # RDT Adaptive Hierarchies
 
+[![CI](https://github.com/RRG314/RDT-Adaptive-Hierarchies/actions/workflows/ci.yml/badge.svg)](https://github.com/RRG314/RDT-Adaptive-Hierarchies/actions/workflows/ci.yml)
+
 RDT Adaptive Hierarchies is a Python research package for deterministic recursive partitions with stable labels, depth metadata, and deterministic coverage schedules. The package is built around a smaller, testable version of the RDT idea: recursive structure is useful when it preserves something measurable during refinement or resize.
 
 The two main applications in this repo are:
@@ -45,8 +47,8 @@ The current evidence snapshot is from repeated local benchmark runs on 2026-05-1
 
 | Area | Current evidence | Interpretation |
 |---|---|---|
-| Stable partitioning | RDT stable labels beat Jump Hash, Morton ordering, grid, modulo hash, rendezvous hash, and remapped-label ablations on the tested combined movement/locality/load score. | Strongest current direction. The claim is a tradeoff claim, not raw speed superiority. |
-| RDT-cover | Full RDT-cover and RDT+Sobol found all 5 seeded numerical edge-case classes at fixed budget; random, Sobol, and Latin hypercube found 2. | Promising deterministic edge-case generator. Needs Hypothesis and real bug-corpus comparisons. |
+| Stable partitioning | RDT stable labels beat Jump Hash, virtual-node consistent hashing, rendezvous hashing, Morton, Hilbert, H3, S2, geohash, grid, and remapped-label ablations on the tested combined movement/locality/load score. | Strongest current direction. The claim is a tradeoff claim, not raw speed superiority. |
+| RDT-cover | Full RDT-cover, RDT+Sobol, and Hypothesis-targeted coverage found all 5 seeded numerical edge-case classes at fixed budget; random, Sobol, and Latin hypercube found fewer. | Promising deterministic edge-case generator. Hypothesis is now a serious baseline, not future work. Real bug-corpus comparisons remain missing. |
 | Geometry validation | Recursive-depth schedule had max relative error `0.0003674` on selected known-form checks; coarse midpoint baseline had `0.0004025`. | Bounded numerical validation result, not a new geometry theory. |
 | Residual sampling | RDT tuned wins on selected synthetic sharp-front and two-hotspot fields, but loses to greedy top residual on oscillatory and real California residual fields. | Research-only. No PDE/PINN training claim is supported. |
 | Shell drift | Some synthetic shifts are detected, but simple histogram and mean/std baselines are competitive or better. | Diagnostic-only. Not an anomaly detector claim. |
@@ -76,23 +78,32 @@ The mechanism ablation matters. Remapping labels from centroids loses badly agai
 
 This does not mean RDT is the fastest partitioner. In timing checks, grid and Morton ordering were faster. The current value is the measured tradeoff: lower movement than spatial orderings, much better locality than hash-only baselines, and acceptable load balance in the tested tasks.
 
+The release-hardening benchmark adds Hilbert, H3, S2, geohash, and virtual-node consistent hashing on 5 synthetic seeds. RDT stable labels remain the best combined score in the tested uniform, clustered, and diagonal datasets:
+
+| Dataset | RDT stable | Rendezvous | Jump Hash | Virtual-node hash | Best spatial ordering |
+|---|---:|---:|---:|---:|---:|
+| Uniform | 0.2005 ± 0.0003 | 0.6622 ± 0.0003 | 0.6757 ± 0.0001 | 0.7346 ± 0.0004 | Hilbert 0.9050 ± 0.0003 |
+| Clustered | 0.2739 ± 0.0202 | 0.6628 ± 0.0002 | 0.6760 ± 0.0002 | 0.7347 ± 0.0002 | Morton 0.9012 ± 0.0014 |
+| Diagonal | 0.1784 ± 0.0002 | 0.6627 ± 0.0004 | 0.6758 ± 0.0001 | 0.7346 ± 0.0004 | Principal sort 0.8771 ± 0.0000 |
+
+Peak Python memory in that run was about `26,957 KiB`. This is process-level `tracemalloc` peak memory for the benchmark run, not a per-method resident-set-size profile.
+
 ### RDT-Cover
 
 The RDT-cover benchmark generates numeric test inputs and counts predeclared edge-case classes. The seeded classes include zero boundary, large cancellation, power transition, outer corner, and thin annulus.
 
 | Method | Mean bug classes found | Mean total hits |
 |---|---:|---:|
-| RDT full | 5.00 | 75.20 |
-| RDT+Sobol | 5.00 | 70.20 |
-| Powers-only | 4.00 | 89.40 |
-| Midpoints-only | 3.00 | 63.00 |
-| Boundaries-only | 3.00 | 40.00 |
-| Random uniform | 2.00 | 35.60 |
-| Sobol | 2.00 | 34.20 |
+| Hypothesis-targeted | 5.00 | 294.60 |
+| RDT full | 5.00 | 68.40 |
+| RDT+Sobol | 5.00 | 63.40 |
+| Random uniform | 2.00 | 25.20 |
+| Sobol | 2.00 | 23.20 |
+| Latin hypercube | 1.40 | 21.80 |
 
 ![RDT-cover edge-case discovery](docs/figures/coverage_ablation.svg)
 
-This result supports RDT-cover as an edge-case complement to random and low-discrepancy sampling. It does not yet show superiority over property-based testing, fuzzing, Hypothesis strategies, or real numerical bug corpora.
+This result supports RDT-cover as an edge-case complement to random and low-discrepancy sampling. The Hypothesis-targeted baseline also finds all five seeded classes and finds many more total hits because it uses predicate-aware strategies. The correct claim is therefore narrower: RDT-cover is a deterministic coverage schedule that remains competitive on this seeded corpus, while Hypothesis is the stronger tool when predicates or properties are available.
 
 ### Residual Sampling Failure Case
 
@@ -116,6 +127,12 @@ Public-data reruns use scikit-learn:
 
 ```bash
 python -m pip install -e ".[test,data]"
+```
+
+Full release-check dependencies include optional geospatial baselines, Hypothesis integration, memory profiling, package build tooling, and public-data support:
+
+```bash
+python -m pip install -e ".[dev]"
 ```
 
 ## Quick Start
@@ -162,7 +179,9 @@ Tests:
 PYTHONPATH=src pytest -q
 ```
 
-Current local validation: `14 passed`.
+Current local validation: `16 passed`.
+
+GitHub Actions runs tests on Python 3.11 and 3.12, executes public examples, runs benchmark smoke checks, and builds source/wheel distributions.
 
 ## Repository Map
 
@@ -170,7 +189,7 @@ Current local validation: `14 passed`.
 |---|---|
 | `src/rdt_adaptive_hierarchy/core/` | Core cells, hierarchy, labels, metrics, coverage, refinement, validation. |
 | `src/rdt_adaptive_hierarchy/applications/` | Stable partitioning, RDT-cover, residual sampler, geometry validation, shell diagnostics. |
-| `src/rdt_adaptive_hierarchy/baselines/` | Jump Hash, rendezvous hashing, Morton ordering, grid, random, Sobol, Latin hypercube. |
+| `src/rdt_adaptive_hierarchy/baselines/` | Jump Hash, virtual-node hashing, rendezvous hashing, Morton, Hilbert, H3, S2, geohash, grid, random, Sobol, Latin hypercube, Hypothesis-targeted coverage. |
 | `src/rdt_adaptive_hierarchy/benchmarks/` | Runnable benchmark entry points. |
 | `examples/` | Short scripts that show the public API. |
 | `docs/` | Definitions, framework specification, claims, limitations, prior work, reproducibility. |
@@ -191,11 +210,22 @@ This project does not claim that RDT is:
 
 Raw RDT spatial indexes are not promoted in this release. Prior adapters matched exactness, but did not establish speed superiority. The spatially useful claim here is stable partitioning under resize.
 
+## Known Failure Cases
+
+These are part of the release boundary, not footnotes:
+
+- RDT is not the fastest raw partitioner. Grid, Morton, and other simple orderings can be faster in machine-local timing checks.
+- RDT-cover is not better than targeted property-based testing when the failure predicates are known. In the release-hardening run, Hypothesis-targeted coverage also found all five seeded edge-case classes.
+- RDT residual sampling is mixed. It helps selected synthetic hotspot fields but loses to greedy top-residual selection on a real California Housing residual field.
+- Shell drift is diagnostic-only. Simple histogram and mean/std baselines remain competitive.
+- Recursive delta preprocessing is not a general compressor. It helps ramp-like synthetic bytes and loses on real text/CSV corpora.
+- Raw RDT spatial-index adapters are not promoted because exactness did not become speed superiority.
+
 ## Relation To Known Methods
 
 The closest neighbors are consistent hashing, Jump Consistent Hash, rendezvous hashing, Morton/Z-order layouts, tree-based spatial indexes, geospatial hierarchies such as H3 and S2, property-based testing, quasi-Monte Carlo sampling, adaptive random testing, and residual adaptive refinement.
 
-RDT should be compared against those methods before stronger public claims. Current missing baselines include Hilbert curves, H3, S2, geohash, virtual-node consistent hashing, Hypothesis, and real numerical bug corpora.
+RDT should be compared against those methods before stronger public claims. Hilbert, H3, S2, geohash, virtual-node consistent hashing, and Hypothesis-targeted coverage are now implemented. Remaining missing work includes larger real workloads, production-style tuning, full memory profiling, and real numerical bug corpora.
 
 ## Project Status
 
